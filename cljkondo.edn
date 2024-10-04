@@ -1,0 +1,101 @@
+{; see here for all options 
+  ;https://github.com/clj-kondo/clj-kondo/blob/master/src/clj_kondo/impl/config.clj
+
+ ; config for linitng inside of comments
+ ; we deactivate all linting.
+ ; all linters see here: https://github.com/clj-kondo/clj-kondo/blob/master/doc/linters.md#type-mismatch
+ ; awb99. the meta info replace should allow us not to disable all linters 
+ ; one by one; however I couldnt get it to work.
+ :config-in-comment
+ ^:replace
+ {:linters
+  {:unresolved-symbol {:level :off}
+   :unused-namespace {:level :off}
+   :unused-binding {:level :off}
+   :unused-referred-var {:level :off :exclude {}}
+   :unused-private-var {:level :off}
+   :redundant-do {:level :off}
+   :unresolved-var  {:level :off}
+   :aliased-namespace-symbol {:level :off}
+   :aliased-namespace-var-usage {:level :off}
+   :type-mismatch {:level :off}
+   :unbound-destructuring-default {:level :off}
+   :unresolved-namespace {:level :off}
+   :invalid-arity {:level :off}
+   :conflicting-fn-arity {:level :off}}}
+; make sure certain macros do not cause errors in the linting.
+  :lint-as {promesa.core/let clojure.core/let
+            de.otto.nom.core/nom clojure.core/let
+            de.otto.nom.core/with-nom clojure.core/let
+            de.otto.nom.core/let-nom clojure.core/let
+            de.otto.nom.core/let-nom> clojure.core/let
+            ta.indicator.helper/indicator clojure.core/let
+            }
+ :linters
+ {
+
+  :consistent-alias {:aliases {tick.core t
+                               tablecloth.api tc
+                               tech.v3.dataset tds
+                               tech.v3.datatype.functional dfn}}
+
+; namespaces in this list are those we get for side-effects.
+  ; it is also possible to do regex search here:
+  ; https://github.com/borkdude/clj-kondo/blob/master/doc/config.md
+  :unused-namespace {:level :off
+                     :exclude [clojure.core.async
+                               cljs.core.async
+                               cljs.core.async.macros]}
+
+  :unused-binding {:level :off}
+  ; warning: #'taoensso.timbre/warn is referred but never used
+
+  :unused-referred-var {:level :off
+                        :exclude {taoensso.timbre [trace tracef ; dont be strict in referring to logging functions 
+                                                   debug debugf
+                                                   info infof
+                                                   warn warnf
+                                                   error errorf]
+                                  clojure.core.async [<! <!! >! >!! put! chan go go-loop]
+                                  cljs.core.async  [<! <!! >! >!! put! chan go go-loop]
+                                  cljs.core.async.macros [go go-loop]
+                                  re-frame.core [reg-event-db dispatch]}}
+
+  :unused-private-var {:level :info}
+
+  :unresolved-symbol {:level :info
+                      :exclude-patterns ["idx"]
+                       ;:creates-vars {org.httpkit.server/with-channel [con]}
+                      }
+
+  ;:redundant-let
+  ;{:level :info
+  ; :exclude [pinkgorilla.events/kernel [kernel]]}
+
+  :redundant-do {:level :info ; because the line below does not work, at least make them not ci breaking
+                 :exclude [pinkgorilla.nrepl.ws.relay/process-message-mem] ; TODO: this does not work 
+                 }
+  ; linters end
+  }
+
+ :output {:format :text ;; or :edn
+          ;:format :edn
+          :summary true ;; outputs summary at end, only applicable to output :text
+          ;; outputs analyzed var definitions and usages of them
+          :analysis false
+          ;; set to truthy to print progress while linting, only applicable to output :text
+          :progress false
+          ;; output can be filtered and removed by regex on filename. empty options leave the output untouched.
+          :include-files [] #_["^src" "^test"]
+          :exclude-files [;".*cljs"
+                          "./lib/indicator/src/ta/indicator/trade.*"
+                          "./lib/viz/src/ta/viz/notebook.*"
+                          ;"src/demo/goldly.*" 
+                          ;"^cljs/core"
+                         ; "profiles/test/src/demo/cljs.*"
+                          ]
+             ;; the output pattern can be altered using a template. use {{LEVEL}} to print the level in capitals.
+             ;; the default template looks like this:
+             ;; :pattern "{{filename}}:{{row}}:{{col}}: {{level}}: {{message}}"
+          :canonical-paths false ;; set to true to see absolute file paths and jar files
+          :level :warning}}
