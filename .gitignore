@@ -47,3 +47,4 @@ app/demo/certs
 .\#*
 .~*
 binaries
+.data
