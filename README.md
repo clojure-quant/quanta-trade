@@ -3,7 +3,20 @@
 
 ## What is quanta-trade?
 
-## DOCS
+### trade-manager
+- gets a entry/exit rule config.
+- input is a stream of entry-signals
+- is in contact with brokers (or simulated brokers)
+- opens and closes positions based on the entry stream, the position-update-stream 
+  and its rule-config.
+
+### trade-statistics
+ - input is a list of open and closed positions ("roundtrips")
+ - outputs
+   - nav time-series (so how did the portfolio value develop over time) 
+   - metrics (like profit-factor and maximum drawdown) 
+
+
 
 
 ## for developers

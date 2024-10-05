@@ -1,0 +1,10 @@
+{:paths ["src"]
+ :deps
+ {org.clojure/clojure    {:mvn/version "1.11.3"}
+  io.github.clojure-quant/quanta-trade {:local/root ".." :deps/manifest :deps}}
+
+ :aliases
+ {
+
+;
+  }}
