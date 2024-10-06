@@ -2,9 +2,7 @@
   (:require 
    [missionary.core :as m]
    [nano-id.core :refer [nano-id]]
-   [quanta.trade.commander :as p]
-   [quanta.dag.env :refer [log]]
-   ))
+   [quanta.trade.commander :as p]))
 
 (defn msg-flow [!-a]
   ; without the stream the last subscriber gets all messages
@@ -64,8 +62,7 @@
         position-action-flow (:flow fs)
         change-flow  (m/stream (m/ap (let [{:keys [open close]} (m/?> position-action-flow)]
                             (cond open
-                                  (let [_ (log "target: open " open)
-                                        id (:id open)
+                                  (let [id (:id open)
                                         position {:id id
                                                   :asset (:asset open)
                                                   :side (:side open)
@@ -74,8 +71,7 @@
                                     (swap! positions assoc id position)
                                       {:open open})
                                   close
-                                  (let [_ (log "target: open " open)
-                                        id (:id close)
+                                  (let [id (:id close)
                                         pos (get @positions id)
                                         pos (assoc pos :exit-price (:price close))]
                                     (swap! positions dissoc id)

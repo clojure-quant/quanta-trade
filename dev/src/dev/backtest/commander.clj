@@ -1,43 +1,36 @@
 (ns dev.backtest.commander
   (:require
    [tick.core :as t]
-   [quanta.algo.core :refer [create-dag-snapshot]]
-   [quanta.trade.commander :as p]
-   [quanta.trade.backtest.commander :refer [create-position-commander]]
-   [dev.util :refer [start-logging]]))
+   [quanta.dag.core :as dag]
+   [quanta.algo.core :as algo]
+   [quanta.trade.backtest.commander :as bcommander]
+   [quanta.trade.commander :as cmd]))
 
-(def c (create-position-commander))
+(def c (bcommander/create-position-commander))
+
+(def dag
+  (-> (dag/create-dag {:log-dir ".data/"
+                       :env {}})
+      (algo/add-env-time-snapshot (t/instant))
+      (cmd/add-commander c)
+      ))
+
+(dag/cell-ids dag)
+;; => (:position-update :roundtrip)
+
+(dag/start-log-cell dag :position-update)
+(dag/start-log-cell dag :roundtrip)
 
 
-
-(def dag 
-  (create-dag-snapshot
-   {:env {p/*commander* c}
-    :log-dir ".data/backtest/"}
-   []
-   (t/instant)))
-
-(defn 
-  "creates a dag from an algo-spec
-   time-events are generated once per calendar as of the date-time of 
-   the last close of each calendar."
-  [dag-env algo-spec dt]
-
-c
-
-(start-logging ".data/commander.txt" (p/position-change-flow c))
-(start-logging ".data/commander.txt" (p/position-roundtrip-flow c))
-
-(def pos1 (p/open! c {:asset "BTC" :side :long :qty 10 :price 5000}))
-(def pos2 (p/open! c {:asset "BTC" :side :long :qty 10 :price 5000}))
+(def pos1 (cmd/open! c {:asset "BTC" :side :long :qty 10 :price 5000}))
+(def pos2 (cmd/open! c {:asset "BTC" :side :long :qty 10 :price 5000}))
 
 pos1
 
 c
 
+(cmd/positions-snapshot c)
 
-(p/postions-snapshot c)
+(cmd/close! c (assoc pos1 :price 7000))
 
-
-(p/close! c (assoc pos1 :price 7000))
 
