@@ -19,18 +19,17 @@
 ;; ds is the dataset up to the current bar, row is
 ;; the last row of the dataset as a map.
 
-(defmulti exit
+(defmulti exit-rule
   "returns a closed roundtrip or nil.
    input: position + row"
-  (fn [{:keys [type]} _position ] type))
+  (fn [{:keys [type]}] type))
 
-
-(defn take-profit [{:keys [target-price label]
-                    :or {label :take-profit}
-                    :as opts} 
-                   {:keys [side] :as position}]
-  (case side 
-    :long 
+(defn- take-profit [{:keys [target-price label]
+                     :or {label :take-profit}
+                     :as opts}
+                    {:keys [side] :as position}]
+  (case side
+    :long
     (fn [_ds {:keys [high] :as row}]
       (when (>= high target-price)
         [label target-price]))
@@ -39,18 +38,58 @@
       (when (<= low target-price)
         [label target-price]))))
 
-(defmethod exit :take-profit-prct [{:keys [label prct]
-                                   :or {label :take-profit-prct}
-                                   :as opts}
-                                  {:keys [price-entry side] :as position}]
+(defmethod exit-rule :profit-prct [{:keys [label prct]
+                                    :or {label :take-profit-prct}
+                                    :as opts}]
+  (println "creating profit-prct exit rule opts: " opts)
   (assert prct "take-profit-prct needs :prct parameter")
-  (let [target-price (case side
-                       :long (* price-entry (+ 1.0 prct))
-                       :short (/ price-entry (+ 1.0 prct)))]
-        (take-profit (assoc opts 
-                            :label label
-                            :target-price target-price
-                            ) position)))
+  (fn [{:keys [price-entry side] :as position}]
+    (println "creating take-profit rule for position: " position)
+    (let [prct (/ prct 100.0)
+          target-price (case side
+                         :long (* price-entry (+ 1.0 prct))
+                         :short (/ price-entry (+ 1.0 prct)))]
+      (println "craeting take-profit target: " target-price)
+      (take-profit (assoc opts
+                          :label label
+                          :target-price target-price) position))))
+
+(defmethod exit-rule :default [{:keys [type]
+                                :as opts}]
+  (throw (ex-info "unkown exit-rule type" opts)))
+
+
+(defn create-exit-manager [exit-rules]
+  {:rules (map exit-rule exit-rules)
+   :positions (atom {})})
+
+(defn position-rules [rules position]
+  (let [position-rules (map #(% position) rules)]
+    (fn [ds row]
+      (->> (map #(% ds row) position-rules)
+           (remove nil?)
+       )
+      )))
+
+
+(defn on-position-open [{:keys [rules positions]}  position]
+  (println "on-position-open: " position)
+  (let [position-fn (position-rules rules position)]
+    (swap! positions assoc (:id position) {:position position 
+                                           :position-fn position-fn
+                                           } )))
+
+
+(defn on-position-close [{:keys [positions]} position]
+  (swap! positions dissoc (:id position)))
+  
+
+(defn on-bar-close [{:keys [positions]} ds row]
+  (map (fn [{:keys [position 
+                    position-fn]}]
+         {:id (:id position)
+          :asset (:asset position)
+          :exit (position-fn ds row)}) (vals @positions)))
 
 
 
