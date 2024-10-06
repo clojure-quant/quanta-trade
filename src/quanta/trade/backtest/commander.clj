@@ -2,8 +2,9 @@
   (:require 
    [missionary.core :as m]
    [nano-id.core :refer [nano-id]]
-   [quanta.trade.protocol :as p]))
-
+   [quanta.trade.commander :as p]
+   [quanta.dag.env :refer [log]]
+   ))
 
 (defn msg-flow [!-a]
   ; without the stream the last subscriber gets all messages
@@ -29,8 +30,7 @@
 (defrecord position-commander [positions 
                                send-action! 
                                position-action-flow
-                               change-flow 
-                               roundtrip-flow]
+                               change-flow ]
   p/position-commander
    (open! [_ {:keys [asset price side qty] :as position}]
      (let [id (nano-id 6)
@@ -50,7 +50,10 @@
   (position-change-flow [_]
     change-flow)
   (position-roundtrip-flow [_]
-    roundtrip-flow)
+    (m/eduction
+      (remove #(:open %))
+      (map :close)
+      change-flow))
   (positions-snapshot [_]
     (-> @positions vals)))
 
@@ -61,7 +64,8 @@
         position-action-flow (:flow fs)
         change-flow  (m/stream (m/ap (let [{:keys [open close]} (m/?> position-action-flow)]
                             (cond open
-                                  (let [id (:id open)
+                                  (let [_ (log "target: open " open)
+                                        id (:id open)
                                         position {:id id
                                                   :asset (:asset open)
                                                   :side (:side open)
@@ -70,14 +74,11 @@
                                     (swap! positions assoc id position)
                                       {:open open})
                                   close
-                                  (let [id (:id close)
+                                  (let [_ (log "target: open " open)
+                                        id (:id close)
                                         pos (get @positions id)
                                         pos (assoc pos :exit-price (:price close))]
                                     (swap! positions dissoc id)
-                                    {:close pos})))))
-        roundtrip-flow (m/eduction
-                          (remove #(:open %))
-                          (map :close)
-                          change-flow)]
-    (position-commander. positions send-action! position-action-flow change-flow roundtrip-flow)))
+                                    {:close pos})))))]
+    (position-commander. positions send-action! position-action-flow change-flow)))
 

@@ -1,11 +1,27 @@
 (ns dev.backtest.commander
   (:require
-   [quanta.trade.protocol :as p]
+   [tick.core :as t]
+   [quanta.algo.core :refer [create-dag-snapshot]]
+   [quanta.trade.commander :as p]
    [quanta.trade.backtest.commander :refer [create-position-commander]]
    [dev.util :refer [start-logging]]))
 
 (def c (create-position-commander))
 
+
+
+(def dag 
+  (create-dag-snapshot
+   {:env {p/*commander* c}
+    :log-dir ".data/backtest/"}
+   []
+   (t/instant)))
+
+(defn 
+  "creates a dag from an algo-spec
+   time-events are generated once per calendar as of the date-time of 
+   the last close of each calendar."
+  [dag-env algo-spec dt]
 
 c
 

@@ -42,4 +42,4 @@ jobs:
         git config --global user.email "andreas.wolfgang.bauer@gmail.com"
         git config --global user.name "awb99"
         clojure -T:build jar 
-        clojure -T:build deploy 
+        clojure -T:build deploy
