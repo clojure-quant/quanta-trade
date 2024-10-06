@@ -51,7 +51,7 @@
     change-flow)
   (position-roundtrip-flow [_]
     roundtrip-flow)
-  (postions-snapshot [_]
+  (positions-snapshot [_]
     (-> @positions vals)))
 
 (defn create-position-commander []

@@ -1,4 +1,4 @@
-(ns quanta.trade.exit)
+(ns quanta.trade.entry-signal.exit)
 
 ;; on-position-open: (exit opts position)
 ;; which returns: (fn [ds row])
@@ -58,39 +58,19 @@
                                 :as opts}]
   (throw (ex-info "unkown exit-rule type" opts)))
 
-
-(defn create-exit-manager [exit-rules]
-  {:rules (map exit-rule exit-rules)
-   :positions (atom {})})
-
 (defn position-rules [rules position]
   (let [position-rules (map #(% position) rules)]
     (fn [ds row]
       (->> (map #(% ds row) position-rules)
-           (remove nil?)
-       )
-      )))
+           (remove nil?)))))
 
 
-(defn on-position-open [{:keys [rules positions]}  position]
-  (println "on-position-open: " position)
-  (let [position-fn (position-rules rules position)]
-    (swap! positions assoc (:id position) {:position position 
-                                           :position-fn position-fn
-                                           } )))
-
-
-(defn on-position-close [{:keys [positions]} position]
-  (swap! positions dissoc (:id position)))
-  
-
-(defn on-bar-close [{:keys [positions]} ds row]
-  (map (fn [{:keys [position 
+(defn check-exit-rules [{:keys [positions]} ds row]
+   (map (fn [{:keys [position
                     position-fn]}]
          {:id (:id position)
           :asset (:asset position)
           :exit (position-fn ds row)}) (vals @positions)))
-
 
 
 
