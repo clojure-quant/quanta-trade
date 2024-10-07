@@ -1,7 +1,7 @@
 (ns dev.backtest.entrysignal
   (:require 
    [tick.core :as t]
-   [quanta.trade.entry-signal.core :as esm]))
+   [quanta.trade.entry-signal.rule :as esm]))
 
 (def m (esm/create-entrysignal-manager
         {:asset "EUR/USD"

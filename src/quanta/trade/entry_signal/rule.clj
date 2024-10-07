@@ -1,7 +1,7 @@
-(ns quanta.trade.entry-signal.core
+(ns quanta.trade.entry-signal.rule
   (:require
-   [quanta.trade.entry-signal.entry :as entry]
-   [quanta.trade.entry-signal.exit :as exit]))
+   [quanta.trade.entry-signal.rule.entry :as entry]
+   [quanta.trade.entry-signal.rule.exit :as exit]))
 
 (defn create-entrysignal-manager [{:keys [asset entry exit]}]
   {:positions (atom {})
@@ -10,16 +10,21 @@
    :exit-rules (map exit/exit-rule exit)})
 
 (defn on-position-open [{:keys [rules positions]}  position]
-  (println "on-position-open: " position)
+  (println "rule/on-position-open: " position)
   (let [position-fn (exit/position-rules rules position)]
     (swap! positions assoc (:id position) {:position position
                                            :position-fn position-fn})))
 
 (defn on-position-close [{:keys [positions]} position]
-  (println "on-position-close: " position)
+  (println "rule/on-position-close: " position)
   (swap! positions dissoc (:id position)))
 
-(defn on-bar-close [this ds row]
-  (println "on-bar: " row)
-  {:exit (exit/check-exit-rules this ds row)
-   :entry (entry/eventually-enter-position this ds row)})
+(defn on-data [this {:keys [ds row] :as data}]
+  (println "rule/on-data: " data)
+  (exit/check-exit-rules this ds row))
+
+(defn create-entry [this {:keys [ds row] :as data}]
+  (println "rule/create-entry: " data)
+  (entry/create-position this data))
+
+

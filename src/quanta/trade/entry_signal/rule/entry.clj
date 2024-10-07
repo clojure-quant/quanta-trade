@@ -1,4 +1,4 @@
-(ns quanta.trade.entry-signal.entry)
+(ns quanta.trade.entry-signal.rule.entry)
 
 (defmulti positionsize2
   (fn [{:keys [type] :as opts}] type))
@@ -18,8 +18,9 @@
   (and signal ; signal might be nil
        (contains? #{:long :short} signal)))
 
-(defn eventually-enter-position [{:keys [asset entrysize-fn]} _ds {:keys [date idx close entry] :as _row}]
-  (when (entry? entry)
+(defn create-position [{:keys [asset entrysize-fn]} 
+                       {:keys [row] :as data}]
+  (let [{:keys [date idx close entry] } row]
     {:side entry
      :asset asset
      :qty (entrysize-fn close)

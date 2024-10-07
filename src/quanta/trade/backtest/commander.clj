@@ -30,14 +30,14 @@
                                position-action-flow
                                change-flow ]
   p/position-commander
-   (open! [_ {:keys [asset price side qty] :as position}]
+   (open! [_ {:keys [asset side qty entry-price] :as position}]
      (let [id (nano-id 6)
            position (assoc position :id id)
            ]
        (assert asset "open-position needs :asset")
        (assert side "open-position needs :side")
        (assert qty "open-position needs :qty")
-       (assert price "open-position needs :price")
+       (assert entry-price "open-position needs :entry-price")
        (send-action! {:open position})
        position))
   (close! [_ {:keys [id price] :as position}]
@@ -67,7 +67,7 @@
                                                   :asset (:asset open)
                                                   :side (:side open)
                                                   :qty (:qty open)
-                                                  :price-entry (:price open)}]
+                                                  :entry-price (:entry-price open)}]
                                     (swap! positions assoc id position)
                                       {:open open})
                                   close
@@ -77,4 +77,5 @@
                                     (swap! positions dissoc id)
                                     {:close pos})))))]
     (position-commander. positions send-action! position-action-flow change-flow)))
+
 

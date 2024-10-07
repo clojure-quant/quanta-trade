@@ -1,4 +1,4 @@
-(ns quanta.trade.entry-signal.exit)
+(ns quanta.trade.entry-signal.rule.exit)
 
 ;; on-position-open: (exit opts position)
 ;; which returns: (fn [ds row])

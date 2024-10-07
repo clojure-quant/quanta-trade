@@ -1,9 +1,9 @@
-(ns dev.backtest.cell
+(ns dev.backtest.from-entry
   (:require
    [taoensso.timbre :as timbre :refer [info]]
    [tablecloth.api :as tc]
    [missionary.core :as m]
-   [quanta.trade.cell.backtest :refer [from-algo-cell]]
+   [quanta.trade.backtest.backtest :refer [from-algo-cell]]
    ))
 
 
