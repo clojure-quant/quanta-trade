@@ -10,7 +10,9 @@
   (close! [this position])
   (position-change-flow [this])
   (position-roundtrip-flow [this])
-  (positions-snapshot [this]))
+  (positions-snapshot [this])
+  (shutdown! [this])
+  )
 
 (defn add-commander [dag commander]
   (-> dag

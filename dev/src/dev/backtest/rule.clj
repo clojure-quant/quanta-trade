@@ -1,9 +1,9 @@
-(ns dev.backtest.entrysignal
+(ns dev.backtest.rule
   (:require 
    [tick.core :as t]
-   [quanta.trade.entry-signal.rule :as esm]))
+   [quanta.trade.entry-signal.rule :as rule]))
 
-(def m (esm/create-entrysignal-manager
+(def m (rule/create-entrysignal-manager
         {:asset "EUR/USD"
          :entry {:type :fixed-qty :fixed-qty 1.0}
          :exit [{:type :profit-prct :prct 1.0}
@@ -12,17 +12,19 @@
 
 m
 
-(esm/on-position-open m  {:id 5 
+(rule/on-position-open m  {:id 5 
                            :asset "EUR/USD"
                            :side :long
                            :qty 100000
                            :price-entry 1.10})
 ;; => {5
 ;;     {:position {:id 5, :asset "EUR/USD", :side :long, :qty 100000, :price-entry 1.1},
-;;      :position-fn #function[quanta.trade.entry-signal.exit/position-rules/fn--24710]}}
+;;      :position-fn #function[quanta.trade.entry-signal.rule.exit/position-rules/fn--50880]}}
 
+(rule/on-data m {:ds nil
+                 :row {:high 1.10 :low 1.09 :idx 1000 :date (t/instant)}})
 
-(esm/on-bar-close m :ds {:high 1.10 :low 1.09 :idx 1000 :date (t/instant)})
+ 
 ;; => {:exit ({:id 5, :asset "EUR/USD", :exit ()}), :entry nil}
 
 

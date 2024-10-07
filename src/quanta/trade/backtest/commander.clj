@@ -23,7 +23,7 @@
      :send (fn [v]
              (if-let [! @!-a]
                (! v)
-               (throw (ex-info "comamnder-stream-error" {}))))}))
+               (throw (ex-info "commander-stream-error" {}))))}))
 
 (defrecord position-commander [positions 
                                send-action! 
@@ -53,7 +53,9 @@
       (map :close)
       change-flow))
   (positions-snapshot [_]
-    (-> @positions vals)))
+    (-> @positions vals))
+  (shutdown! [_]
+     (send-action! (reduced {:shutdown true}))))
 
 (defn create-position-commander []
   (let [positions (atom {})
@@ -75,7 +77,10 @@
                                         pos (get @positions id)
                                         pos (assoc pos :exit-price (:price close))]
                                     (swap! positions dissoc id)
-                                    {:close pos})))))]
+                                    {:close pos})
+                                  :else 
+                                   {}
+                                  ))))]
     (position-commander. positions send-action! position-action-flow change-flow)))
 
 

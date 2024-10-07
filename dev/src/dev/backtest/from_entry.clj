@@ -3,9 +3,7 @@
    [taoensso.timbre :as timbre :refer [info]]
    [tablecloth.api :as tc]
    [missionary.core :as m]
-   [quanta.trade.backtest.backtest :refer [from-algo-cell]]
-   ))
-
+   [quanta.trade.backtest.from-entry :refer [from-algo-ds]]))
 
 (def ds
   (tc/dataset {:open [40 40 50 80 100 240 130 70 90]
@@ -14,13 +12,12 @@
 
 ds
 
-(def algo-cell (m/seed [ds]))
+(defn process-row [r {:keys [data entry-signal] :as x}]
+  (info "x: "  x)
+  (info "data: " data)
+  (when entry-signal
+    (info "entry-signal: " entry-signal)))
 
-(defn process-row [r
-                   {:keys [idx row ds] :as x}]
-  ;(info "x: "  x)
-  (info "idx: " idx
-        "#: "  (tc/row-count ds)
-        "row: " row))
 
-(m/? (m/reduce process-row nil (from-algo-cell algo-cell)))
+
+(m/? (m/reduce process-row nil (from-algo-ds ds)))

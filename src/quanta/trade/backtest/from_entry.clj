@@ -33,7 +33,9 @@
                    (m/amb
                       output
                       (recur (inc idx)))
-                   (m/amb output)))))))))
+                   (m/amb (assoc output :shutdown true)
+                          (reduced {:shutdown :now})
+                          )))))))))
 
 
 (defn from-algo-ds [ds]
