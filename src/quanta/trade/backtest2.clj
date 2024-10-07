@@ -27,12 +27,18 @@
                             (swap! roundtrips-a conj rt))
                           (cmd/position-roundtrip-flow commander))
 
-        task (m/reduce (fn [_ {:keys [data entry-signal shutdown
-                                      open] :as x}]
-                         (println "x: " x)
+        task (m/reduce (fn [_ {:keys [data entry-signal shutdown ; from algo
+                                      open close ; from commander
+                                      ] 
+                               :as x}]
+                         (println "x: " (keys x))
                          ;; from algo
+                         ;; first check exits.
                          (when data
-                           (rule/on-data rm data))
+                           (let [exits (rule/check-exit rm data)]
+                              (println "exits: " exits)
+                              (doall (map #(cmd/close! commander %) exits))))
+                         ;; second check entries.
                          (when (and data entry-signal)
                            (let [position (rule/create-entry rm data)]
                              (cmd/open! commander position)))
@@ -43,13 +49,16 @@
                          ;; from commander
                          (when open
                             ; {:side :long, :asset EUR/USD, :qty 1.0, :entry-idx 3, :entry-date nil, :entry-price 80, :id EOG7TD}
-                           (rule/on-position-open rm open)))
+                           (rule/on-position-open rm open))
+                         (when close 
+                           (rule/on-position-close rm close)))
                        nil mixed-flow)]
 
     ;(m/? task)
     (m/? (m/race task done acc-rts-task))
     @roundtrips-a
     ))
+
 
 
 

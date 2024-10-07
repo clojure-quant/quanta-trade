@@ -24,32 +24,39 @@
    input: position + row"
   (fn [{:keys [type]}] type))
 
+
 (defn- take-profit [{:keys [target-price label]
                      :or {label :take-profit}
                      :as opts}
                     {:keys [side] :as position}]
   (case side
     :long
-    (fn [_ds {:keys [high] :as row}]
-      (when (>= high target-price)
-        [label target-price]))
+    (fn [{:keys [row]}]
+      ;(println "take-profit-long check: " row)
+      (let [{:keys [high]} row]
+        (when (>= high target-price)
+          [label target-price])))
     :short
-    (fn [_ds {:keys [low] :as row}]
-      (when (<= low target-price)
-        [label target-price]))))
+    (fn [{:keys [row]}]
+      ;(println "take-profit-short check: " row)
+      (let [{:keys [low]} row]
+        (when (<= low target-price)
+          [label target-price])))))
 
 (defmethod exit-rule :profit-prct [{:keys [label prct]
-                                    :or {label :take-profit-prct}
+                                    :or {label :profit-prct}
                                     :as opts}]
-  (println "creating profit-prct exit rule opts: " opts)
+  ;(println "creating profit-prct exit rule opts: " opts)
   (assert prct "take-profit-prct needs :prct parameter")
-  (fn [{:keys [price-entry side] :as position}]
-    (println "creating take-profit rule for position: " position)
+  (fn [{:keys [entry-price side] :as position}]
+    ;(println "creating profit-prct rule for position: " position)
+    (assert entry-price "exit-rule needs :entry-price")
+    (assert side "exit-rule needs :side")
     (let [prct (/ prct 100.0)
           target-price (case side
-                         :long (* price-entry (+ 1.0 prct))
-                         :short (/ price-entry (+ 1.0 prct)))]
-      (println "craeting take-profit target: " target-price)
+                         :long (* entry-price (+ 1.0 prct))
+                         :short (/ entry-price (+ 1.0 prct)))]
+      ;(println "take-profit target: " target-price)
       (take-profit (assoc opts
                           :label label
                           :target-price target-price) position))))
@@ -58,21 +65,48 @@
                                 :as opts}]
   (throw (ex-info "unkown exit-rule type" opts)))
 
-(defn position-rules [rules position]
+(defn position-rules 
+  "create a exit-fn for one position. 
+   this gets run on each bar, while the positon is open"
+  [rules position]
+  ;(println "creating exit-rules for position: " position)
+  ;(println "exit rules:  " rules)
   (let [position-rules (map #(% position) rules)]
-    (fn [ds row]
-      (->> (map #(% ds row) position-rules)
-           (remove nil?)))))
+    (fn [data]
+      (->> (map #(% data) position-rules)
+           (remove nil?)
+           first))))
 
 
-(defn check-exit-rules [{:keys [positions]} ds row]
-   (map (fn [{:keys [position
-                    position-fn]}]
-         {:id (:id position)
-          :asset (:asset position)
-          :exit (position-fn ds row)}) (vals @positions)))
+(defn check-exit-position [{:keys [position
+                                   position-fn]
+                            :as p} data]
+  ;(println "check-exit-position: " position)
+  ;; {:id 5, :asset EUR/USD, :side :long, 
+  ;;         :entry-price 1.1, :qty 100000}
 
+  (when-let [exit (position-fn data)] ; [:profit-prct 1.1110000000000002]
+    (let [[reason exit-price] exit
+          {:keys [id asset side entry-price entry-date qty]} position
+          {:keys [idx date]} (:row data)
+          ]
+    {:id id 
+     :asset asset
+     :side side 
+     :qty qty
+     :entry-price entry-price
+     :entry-date entry-date
+     ; exit
+     :reason reason
+     :exit-idx idx
+     :exit-price exit-price
+     :exit-date date
+     })))
 
+(defn check-exit-rules [{:keys [positions]} data]
+  (->> (vals @positions)
+       (map #(check-exit-position % data))
+       (remove nil?)))
 
 
 
