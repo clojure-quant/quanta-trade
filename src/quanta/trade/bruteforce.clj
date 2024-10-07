@@ -4,8 +4,19 @@
    [tick.core :as t]
    [taoensso.timbre :refer [info warn error]]
    [missionary.core :as m]
-   [quanta.algo.core :refer [calculate-cell-once]]
+   [quanta.dag.core :as dag]
+   [quanta.algo.core :as algo]
    [quanta.algo.options :refer [create-algo-variations]]))
+
+(defn calculate-cell-once
+    "creates a snapshot dag as of dt from an algo spec, 
+   and calculates and returns cell-id"
+    [dag-env algo-spec dt cell-id]
+    (let [d (-> (dag/create-dag dag-env)
+                (algo/add-env-time-snapshot dt)
+                (algo/add-algo algo-spec))]
+      (dag/get-current-valid-value d cell-id)))
+
 
 (defn variation-keys [variations]
   (->> variations

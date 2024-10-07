@@ -4,7 +4,7 @@
    [clojure.pprint :refer [print-table]]
    [quanta.dag.core :as dag]
    [quanta.algo.env.bars]
-   [quanta.algo.core :refer [create-dag-live create-dag-snapshot]]
+   [quanta.algo.core :as algo]
    [quanta.algo.options :refer [make-variations create-algo-variations]]
    [quanta.trade.bruteforce :refer [bruteforce] :as bf]
    [ta.import.provider.bybit.ds :as bybit]
