@@ -41,9 +41,9 @@
        (println "commander/open! " position)
        (send-action! {:open position})
        position))
-  (close! [_ {:keys [id price] :as position}]
-     (assert id "close-position needs :id")
-     (assert price "close-position needs :price")
+  (close! [_ {:keys [id exit-price] :as position}]
+     ;(assert id "close-position needs :id")
+     ;(assert exit-price "close-position needs :exit-price")
     (println "commander/close! " position)
     (send-action! {:close position})
     position)
@@ -71,13 +71,20 @@
                                                   :asset (:asset open)
                                                   :side (:side open)
                                                   :qty (:qty open)
-                                                  :entry-price (:entry-price open)}]
+                                                  :entry-price (:entry-price open)
+                                                  :entry-date (:entry-date open)
+                                                  :entry-idx (:entry-idx open)
+                                                  }]
                                     (swap! positions assoc id position)
                                       {:open open})
                                   close
                                   (let [id (:id close)
                                         pos (get @positions id)
-                                        pos (assoc pos :exit-price (:price close))]
+                                        pos (assoc pos :exit-price (:exit-price close)
+                                                       :exit-date (:exit-date close)
+                                                       :exit-idx (:exit-idx close)
+                                                       :reason (:reason close)
+                                                   )]
                                     (swap! positions dissoc id)
                                     {:close pos})
                                   :else 
