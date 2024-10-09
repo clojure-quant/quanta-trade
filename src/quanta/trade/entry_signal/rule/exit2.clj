@@ -1,10 +1,13 @@
 (ns quanta.trade.entry-signal.rule.exit2)
 
 (defprotocol IExit
+  (priority [_])
   (check-exit [_ bar]))
 
 (defrecord TakeProfit [position level label]
   IExit
+  (priority [_]
+    2)
   (check-exit [_ {:keys [high low]}]
     (case (:side position)
       :long
@@ -16,6 +19,8 @@
 
 (defrecord StopLoss [position level label]
   IExit
+  (priority [_]
+            1)
   (check-exit [_ {:keys [high low]}]
     (case (:side position)
       :short
@@ -27,6 +32,8 @@
 
 (defrecord MaxTime [position max-idx label]
   IExit
+  (priority [_]
+            3)
   (check-exit [_ {:keys [idx close]}]
     (when (>= idx max-idx)
       [label close])))
@@ -51,22 +58,6 @@
   ;
   )
 
-(defmulti exit-rule
-  (fn [{:keys [type]}] type))
-
-(defmethod exit-rule :profit-prct [{:keys [position label prct]
-                                    :or {label :profit-prct}}]
-  (assert prct "take-profit-prct needs :prct parameter")
-  (assert prct "take-profit-prct needs :position parameter")
-  (let [{:keys [entry-price side]} position]
-    ;(println "creating profit-prct rule for position: " position)
-    (assert entry-price "take-profit-prct needs :position :entry-price")
-    (assert side "take-profit-prct needs :position :side")
-    (let [prct (/ prct 100.0)
-          level (case side
-                  :long (* entry-price (+ 1.0 prct))
-                  :short (/ entry-price (+ 1.0 prct)))]
-      (TakeProfit. position level label))))
 
 (defrecord TrailingTakeProfit [position level adjust-level-fn label]
   IExit
@@ -84,18 +75,29 @@
         (reset! level new-level))
       r)))
 
-(defrecord TrailingStopLoss [position level adjust-level-fn label]
+(defrecord TrailingStopLoss [position level-a new-level-fn label]
   IExit
   (check-exit [_ {:keys [high low] :as row}]
-    (let [r (case (:side position)
+    (let [; first check if there is an exit at curent level
+          r (case (:side position)
               :short
-              (when (>= high level)
-                [label level])
+              (when (>= high @level-a)
+                [label @level-a])
               :long
-              (when (<= low level)
-                [label level]))
-          new-level (adjust-level-fn position level row)]
+              (when (<= low @level-a)
+                [label @level-a]))
+          ; second calculate new level, and possibly move level
+          new-level (new-level-fn position @level-a row)
+          new-level (case (:side position)
+                      :short 
+                      (when (< new-level @level-a)
+                        new-level)
+                      :long 
+                      (when (> new-level @level-a)
+                        new-level))]
       (when new-level
-        (println "TrailingStopLoss changes to: " level)
-        (reset! level new-level))
+        (println "TrailingStopLoss changes from " @level-a " to: " new-level)
+        (reset! level-a new-level))
       r)))
+
+
