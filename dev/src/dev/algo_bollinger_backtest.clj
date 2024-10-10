@@ -10,6 +10,7 @@
 ;; ENV
 
 (def bar-db (bybit/create-import-bybit))
+
 (def env {#'quanta.algo.env.bars/*bar-db* bar-db})
 
 (def bollinger
@@ -23,6 +24,8 @@
 ;; => ([:crypto :d] :day [:crypto :m] :min :stats :backtest)
 
 (dag/start-log-cell bollinger :day)
+
+(dag/start-log-cell bollinger :backtest-old)
 
 (dag/start-log-cell bollinger :backtest)
 

@@ -9,7 +9,7 @@
    [quanta.algo.env.bars :refer [get-trailing-bars]]
    [quanta.algo.dag.spec :refer [spec->ops]]
    [quanta.algo.options :refer [apply-options]]
-   ;[quanta.trade.backtest :refer [backtest]]
+   [quanta.trade.backtest :as b1]
    [quanta.trade.backtest2 :as b2]
    ))
 
@@ -63,13 +63,16 @@
            :carry-n 2}
    :backtest {:formula [:day]
               :algo b2/backtest
-              :entry ; [:fixed-amount 100000]
-                     {:type :fixed-qty :fixed-qty 1.0}
-              :exit #_[:loss-percent 2.0
-                     :profit-percent 1.0
-                     :time 5]
-                     [{:type :trailing-stop-offset :col :atr}]
-              }])
+              :entry {:type :fixed-qty :fixed-qty 1.0}
+              :exit [{:type :trailing-stop-offset :col :atr}]}
+   :backtest-old  {:formula [:day]
+                   :algo b1/backtest
+                   :entry  [:fixed-amount 100000]
+                   :exit [:loss-percent 2.0
+                            :profit-percent 1.0
+                            :time 5]}
+   
+   ])
 
 (spec->ops bollinger-algo)
 ;; => [[:day {:calendar [:forex :d],
