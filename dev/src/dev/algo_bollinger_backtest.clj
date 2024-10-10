@@ -19,7 +19,6 @@
       (algo/add-env-time-snapshot (t/instant))
       (algo/add-algo bollinger-algo)))
 
-
 (dag/cell-ids bollinger)
 ;; => ([:crypto :d] :day [:crypto :m] :min :stats :backtest)
 

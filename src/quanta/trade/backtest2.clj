@@ -1,11 +1,12 @@
 (ns quanta.trade.backtest2
   (:require
    [missionary.core :as m]
+   [tablecloth.api :as tc]
    [quanta.trade.commander :as cmd]
    [quanta.trade.entry-signal.core :as rule]
    [quanta.trade.backtest.commander :refer [create-position-commander]]
    [quanta.trade.backtest.from-entry :refer [from-algo-ds]]
-   [tablecloth.api :as tc]))
+   [ta.trade.roundtrip.core :refer [roundtrip-stats]]))
 
 
 (defn algo-action [{:keys [rm commander]} entry-data-flow]
@@ -67,7 +68,7 @@
                           (cmd/position-roundtrip-flow commander))
         prior-command-seq (atom [])
         task (m/reduce (fn [r x]
-                         (println "x: " x)
+                         ;(println "x: " x)
                          (let [[command-seq signal-action] x]
                            ;(println "command-seq: " command-seq)
                            (when (not (= @prior-command-seq command-seq))
@@ -98,8 +99,10 @@
     (m/? (m/race task done 
                  acc-rts-task
                  ))
-    @roundtrips-a
-    ))
+    (let [roundtrips (tc/dataset @roundtrips-a) 
+          rt-stats (roundtrip-stats roundtrips)]
+      rt-stats
+      )))
 
 
 
