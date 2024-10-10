@@ -11,17 +11,14 @@
   (position-change-flow [this])
   (position-roundtrip-flow [this])
   (positions-snapshot [this])
-  (shutdown! [this])
-  )
+  (shutdown! [this]))
 
 (defn add-commander [dag commander]
   (-> dag
-     (update-in [:env] assoc #'quanta.trade.commander/*commander* commander) 
-     (dag/add-cell :position-update (position-change-flow commander))    
-     (dag/add-cell :roundtrip (position-roundtrip-flow commander))))
+      (update-in [:env] assoc #'quanta.trade.commander/*commander* commander)
+      (dag/add-cell :position-update (position-change-flow commander))
+      (dag/add-cell :roundtrip (position-roundtrip-flow commander))))
 
-
-; (dag/start! dag cell-id task
 
 
 (defn start-logging [file-name flow]
