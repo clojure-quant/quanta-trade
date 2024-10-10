@@ -5,8 +5,6 @@
    [quanta.algo.env.bars]
    [quanta.algo.core :as algo]
    [ta.import.provider.bybit.ds :as bybit]
-   [ta.db.bars.protocol :as b]
-   [ta.calendar.core :refer [trailing-window]]
    [dev.algo-bollinger :refer [bollinger-algo]]))
 
 ;; ENV
@@ -21,10 +19,12 @@
       (algo/add-algo bollinger-algo)))
 
 
-
 (dag/cell-ids bollinger)
 ;; => ([:crypto :d] :day [:crypto :m] :min :stats :backtest)
 
+(dag/start-log-cell bollinger :day)
+
 (dag/start-log-cell bollinger :backtest)
+
 ;; see .data/ for dag logfile.
 

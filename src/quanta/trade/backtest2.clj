@@ -4,7 +4,8 @@
    [quanta.trade.commander :as cmd]
    [quanta.trade.entry-signal.core :as rule]
    [quanta.trade.backtest.commander :refer [create-position-commander]]
-   [quanta.trade.backtest.from-entry :refer [from-algo-ds]]))
+   [quanta.trade.backtest.from-entry :refer [from-algo-ds]]
+   [tablecloth.api :as tc]))
 
 
 (defn algo-action [{:keys [rm commander]} entry-data-flow]
@@ -25,13 +26,10 @@
             (let [position (rule/create-entry rm data)]
               (println "sending entry: " position)
               (cmd/open! commander position)))
-        
+        ; return data:
          (if shutdown
            {:shutdown true}
-           data) 
-
-        )))
-
+           data))))
 
 
  (defn batch-combiner [r v]
@@ -52,6 +50,7 @@
              action-flow))
 
 (defn backtest [{:keys [asset entry exit] :as opts} bar-ds]
+  (println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
   (let [entry-data-flow (from-algo-ds bar-ds)
         commander (create-position-commander) ; a simplified version of a broker-api
         rm (rule/create-entrysignal-manager opts)
@@ -68,7 +67,7 @@
                           (cmd/position-roundtrip-flow commander))
         prior-command-seq (atom [])
         task (m/reduce (fn [r x]
-                         ;(println "x: " x)
+                         (println "x: " x)
                          (let [[command-seq signal-action] x]
                            ;(println "command-seq: " command-seq)
                            (when (not (= @prior-command-seq command-seq))
@@ -101,6 +100,8 @@
                  ))
     @roundtrips-a
     ))
+
+
 
 
 

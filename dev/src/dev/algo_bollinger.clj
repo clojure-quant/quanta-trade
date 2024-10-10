@@ -2,13 +2,16 @@
   (:require
    [tech.v3.datatype :as dtype]
    [tablecloth.api :as tc]
+   [ta.indicator :as ind]
    [ta.indicator.band :as band]
    [ta.indicator.signal :refer [cross-up]]
    [quanta.dag.env :refer [log]]
    [quanta.algo.env.bars :refer [get-trailing-bars]]
    [quanta.algo.dag.spec :refer [spec->ops]]
    [quanta.algo.options :refer [apply-options]]
-   [quanta.trade.backtest :refer [backtest]]))
+   ;[quanta.trade.backtest :refer [backtest]]
+   [quanta.trade.backtest2 :as b2]
+   ))
 
 (defn entry-one [long short]
   (cond
@@ -28,7 +31,10 @@
         long-signal (cross-up (:close ds-bollinger) (:bollinger-upper ds-bollinger))
         short-signal (cross-up (:close ds-bollinger) (:bollinger-lower ds-bollinger))
         entry (dtype/clone (dtype/emap entry-one :keyword long-signal short-signal))
-        ds-signal (tc/add-column ds-bollinger :entry entry entry)]
+        ds-signal (tc/add-columns ds-bollinger {:entry entry 
+                                                :atr (ind/atr {:n n} ds-bars)
+                                                
+                                                })]
     ds-signal))
 
 (defn bollinger-stats [opts ds-d ds-m]
@@ -56,11 +62,14 @@
            :algo bollinger-stats
            :carry-n 2}
    :backtest {:formula [:day]
-              :algo backtest
-              :entry [:fixed-amount 100000]
-              :exit [:loss-percent 2.0
+              :algo b2/backtest
+              :entry ; [:fixed-amount 100000]
+                     {:type :fixed-qty :fixed-qty 1.0}
+              :exit #_[:loss-percent 2.0
                      :profit-percent 1.0
-                     :time 5]}])
+                     :time 5]
+                     [{:type :trailing-stop-offset :col :atr}]
+              }])
 
 (spec->ops bollinger-algo)
 ;; => [[:day {:calendar [:forex :d],

@@ -35,8 +35,8 @@
                :atr [ 5 5 5 5
                      5 5 5
                      5 5 5 5 5]
-               :entry [nil :long nil nil
-                       :long nil nil 
+               :entry [:flat :long nil nil
+                       :long :flat :flat 
                        :short nil nil nil]}))
 
 
