@@ -32,9 +32,9 @@
           level-a (atom level-initial)
           new-level-fn (fn [position level row]
                          (let [{:keys [entry-price side]} position
-                               offset (get row col)
                                close (:close row)
                                offset (get row col)]
+                           (println "new-level offset: " offset)
                            (if level 
                              (case side
                                :long (- close offset)

@@ -15,22 +15,27 @@
                       (t/instant "2024-09-07T00:00:00Z")
                       (t/instant "2024-09-08T00:00:00Z")
                       (t/instant "2024-09-09T00:00:00Z")
-                      (t/instant "2024-09-10T00:00:00Z")]
+                      (t/instant "2024-09-10T00:00:00Z")
+                      (t/instant "2024-09-11T00:00:00Z")]
                :open [100 100 120 120
                       100 100 120 
-                      100 90 100]
+                      100 90 100 100]
                :high [100 100 120 120
                       100 100 120
-                      100 90 100]
+                      100 90 100 100]
                :low [100 100 120 120
                      100 100 120
-                     100 90 100]
+                     100 90 100 100]
                :close [100 100 120 120
                        100 100 120
-                       100 90 100]
+                       100 90 100 100]
+               :atr [ 5 5 5 5
+                     5 5 5
+                     5 5 5 5]
                :entry [nil :long nil nil
                        :long nil nil 
-                       :short nil nil]}))
+                       :short nil nil nil]}))
+
 
 bar-ds
 
@@ -58,3 +63,30 @@ bar-ds
 ; |  :long |  1.0 |          100 |             101.0 | 2024-09-02T00:00:00Z | 2024-09-03T00:00:00Z | :profit-prct |
 ; |  :long |  1.0 |          100 |             101.0 | 2024-09-05T00:00:00Z | 2024-09-07T00:00:00Z | :profit-prct |
 ; | :short |  1.0 |          100 | 99.00990099009901 | 2024-09-08T00:00:00Z | 2024-09-09T00:00:00Z | :profit-prct |
+
+
+(->> (backtest {:asset "EUR/USD"
+                :entry {:type :fixed-qty :fixed-qty 1.0}
+                :exit [{:type :trailing-stop-offset :col :atr }
+                       ]}
+               bar-ds)
+     ;; => Evaluation was interrupted
+
+
+     (print-table [;  :id
+                    ; :asset 
+                   :side
+                   :qty
+                   :entry-price
+                   :exit-price
+                   :entry-date
+                   :exit-date
+                   :reason
+                    ; :entry-idx
+                    ; :exit-idx
+                   ]))
+
+; | :side | :qty | :entry-price | :exit-price |          :entry-date |           :exit-date |        :reason |
+; |-------+------+--------------+-------------+----------------------+----------------------+----------------|
+; | :long |  1.0 |          100 |         115 | 2024-09-02T00:00:00Z | 2024-09-05T00:00:00Z | :trailing-stop |
+; | :long |  1.0 |          100 |         115 | 2024-09-05T00:00:00Z | 2024-09-08T00:00:00Z | :trailing-stop |

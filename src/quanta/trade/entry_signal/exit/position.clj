@@ -79,13 +79,15 @@
   IExit
   (check-exit [_ {:keys [high low] :as row}]
     (let [; first check if there is an exit at curent level
-          r (case (:side position)
+          _ (println "chekcintg TrailingStopLoss...")
+          r (when (not (nil? @level-a))
+              (case (:side position)
               :short
               (when (>= high @level-a)
                 [label @level-a])
               :long
               (when (<= low @level-a)
-                [label @level-a]))
+                [label @level-a])))
           ; second calculate new level, and possibly move level
           new-level (new-level-fn position @level-a row)
           new-level (case (:side position)
