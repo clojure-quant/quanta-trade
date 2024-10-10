@@ -6,7 +6,7 @@
         org.pinkgorilla/timbre {:mvn/version "0.0.7"}
         scicloj/tablecloth {:mvn/version "7.021"} ; brings techml-dataset
         io.github.clojure-quant/quanta {:mvn/version "0.4.866"}
-        io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.1.7"}}
+        io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.1.8"}}
 
  :aliases
  {:test {:extra-paths ["test"]
