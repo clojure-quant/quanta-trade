@@ -34,7 +34,7 @@
                          (let [{:keys [entry-price side]} position
                                close (:close row)
                                offset (get row col)]
-                           (println "new-level offset: " offset)
+                           (println "trailing offset: " offset " close: " close " level: " level "entry: " entry-price)
                            (if level 
                              (case side
                                :long (- close offset)

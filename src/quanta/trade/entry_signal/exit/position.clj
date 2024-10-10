@@ -78,8 +78,7 @@
 (defrecord TrailingStopLoss [position level-a new-level-fn label]
   IExit
   (check-exit [_ {:keys [high low] :as row}]
-    (let [; first check if there is an exit at curent level
-          _ (println "chekcintg TrailingStopLoss...")
+    (let [; first check if there is an exit at current level
           r (when (not (nil? @level-a))
               (case (:side position)
               :short
@@ -89,19 +88,24 @@
               (when (<= low @level-a)
                 [label @level-a])))
           ; second calculate new level, and possibly move level
-          new-level (new-level-fn position @level-a row)
+          unchecked-level (new-level-fn position @level-a row)
+          _ (println "trailing unchecked-level: " unchecked-level)
           new-level (case (:side position)
                       :short 
                       (when (or (nil? @level-a)
-                                (< new-level @level-a))
-                        new-level)
+                                (< unchecked-level @level-a))
+                        unchecked-level)
                       :long 
                       (when (or (nil? @level-a) 
-                                (> new-level @level-a))
-                        new-level))]
+                                (> unchecked-level @level-a))
+                        unchecked-level))]
       (when new-level
         (println "TrailingStopLoss changes from " @level-a " to: " new-level)
         (reset! level-a new-level))
+      (when (not new-level)
+        (println "TrailingStopLoss unchanged level: " @level-a 
+                 " side: " (:side position) " unchecked level: " unchecked-level)
+        )
       r)))
 
 
