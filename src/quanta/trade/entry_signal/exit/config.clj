@@ -2,7 +2,11 @@
   (:require
    [quanta.trade.entry-signal.exit.position :as e])
   (:import
-   [quanta.trade.entry_signal.exit.position TakeProfit TrailingStopLoss MultipleRules]))
+   [quanta.trade.entry_signal.exit.position 
+    TakeProfit 
+    StopLoss TrailingStopLoss 
+    MaxTime
+    MultipleRules]))
 
 (defmulti exit-rule
   (fn [{:keys [type] :as opts}]
@@ -20,6 +24,28 @@
                   :long (* entry-price (+ 1.0 prct))
                   :short (/ entry-price (+ 1.0 prct)))]
       (TakeProfit. position level label))))
+
+(defmethod exit-rule :stop-prct [{:keys [label prct]
+                                  :or {label :stop-prct}}]
+  (assert prct "stop-prct needs :prct parameter")
+  (fn [{:keys [entry-price side] :as position}]
+    ;(println "creating profit-prct rule for position: " position)
+    (assert entry-price "stop-prct needs :position :entry-price")
+    (assert side "stop-prct needs :position :side")
+    (let [prct (/ prct 100.0)
+          level (case side
+                  :long (/ entry-price (+ 1.0 prct))
+                  :short (* entry-price (+ 1.0 prct)))]
+      (StopLoss. position level label))))
+
+(defmethod exit-rule :time [{:keys [label max-bars]
+                                  :or {label :time}}]
+  (assert max-bars "stop-time needs :max-bars parameter")
+  (fn [{:keys [entry-idx] :as position}]
+    (assert entry-idx "stop-time needs :position :entry-idx")
+    (let [max-idx (+ entry-idx max-bars)]
+      (MaxTime. position max-idx label))))
+
 
 (defmethod exit-rule :trailing-stop-offset [{:keys [col label]
                                              :or {label :trailing-stop}}]
