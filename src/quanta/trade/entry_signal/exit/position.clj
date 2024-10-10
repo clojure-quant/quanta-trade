@@ -1,4 +1,4 @@
-(ns quanta.trade.entry-signal.rule.exit2)
+(ns quanta.trade.entry-signal.exit.position)
 
 (defprotocol IExit
   (priority [_])
@@ -90,14 +90,24 @@
           new-level (new-level-fn position @level-a row)
           new-level (case (:side position)
                       :short 
-                      (when (< new-level @level-a)
+                      (when (or (nil? @level-a)
+                                (< new-level @level-a))
                         new-level)
                       :long 
-                      (when (> new-level @level-a)
+                      (when (or (nil? @level-a) 
+                                (> new-level @level-a))
                         new-level))]
       (when new-level
         (println "TrailingStopLoss changes from " @level-a " to: " new-level)
         (reset! level-a new-level))
       r)))
 
+
+(defrecord MultipleRules [rules]
+  IExit
+  (check-exit [_ {:keys [high low] :as row}]
+     (->> rules
+          (map #(check-exit % row))
+          (remove nil?)
+          first)))
 

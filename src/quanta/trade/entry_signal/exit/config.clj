@@ -1,0 +1,49 @@
+(ns quanta.trade.entry-signal.exit.config
+  (:require
+   [quanta.trade.entry-signal.exit.position :as e])
+  (:import
+   [quanta.trade.entry_signal.exit.position TakeProfit TrailingStopLoss MultipleRules]))
+
+(defmulti exit-rule
+  (fn [{:keys [type] :as opts}]
+    type))
+
+(defmethod exit-rule :profit-prct [{:keys [label prct]
+                                    :or {label :profit-prct}}]
+  (assert prct "take-profit-prct needs :prct parameter")
+  (fn [{:keys [entry-price side] :as position}]
+    ;(println "creating profit-prct rule for position: " position)
+    (assert entry-price "take-profit-prct needs :position :entry-price")
+    (assert side "take-profit-prct needs :position :side")
+    (let [prct (/ prct 100.0)
+          level (case side
+                  :long (* entry-price (+ 1.0 prct))
+                  :short (/ entry-price (+ 1.0 prct)))]
+      (TakeProfit. position level label))))
+
+(defmethod exit-rule :trailing-stop-offset [{:keys [col label]
+                                             :or {label :trailing-stop}}]
+  (assert col "trailing-stop-offset needs :col parameter")
+  (fn [position]
+    ;(assert entry-price "trailing-stop-offset needs :position :entry-price")
+    ;(assert side "trailing-stop-offset needs :position :side")
+    (let [;_ (assert offset (str "trailing-stop-offset needs :row " col " value"))
+          level-initial nil
+          level-a (atom level-initial)
+          new-level-fn (fn [position level row]
+                         (let [{:keys [entry-price side]} position
+                               offset (get row col)
+                               close (:close row)
+                               offset (get row col)]
+                           (if level 
+                             (case side
+                               :long (- close offset)
+                               :short (+ close offset))
+                             (case side
+                               :long (- entry-price offset)
+                               :short (+ entry-price offset)))))]
+      (TrailingStopLoss. position level-a new-level-fn label))))
+
+
+
+

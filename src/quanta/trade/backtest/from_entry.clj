@@ -18,12 +18,8 @@
                  r (range n)
                  ds-idx (tc/add-column ds :idx r)]
              (loop [idx 0]
-               (let [ds-until-idx (tc/select-rows ds-idx (range 0 (inc idx)))
-                     row (row-at ds-idx idx)
-                     output {;:idx idx
-                             :data {:row row
-                                    :ds nil ; ds-until-idx      
-                                   }}
+               (let [row (row-at ds-idx idx)
+                     output {:data row}
                      entry (:entry row)
                      output (case entry 
                                :long (assoc output :entry-signal entry)

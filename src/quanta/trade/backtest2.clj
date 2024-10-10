@@ -4,7 +4,7 @@
    [tablecloth.api :as tc]
    [missionary.core :as m]
    [quanta.trade.commander :as cmd]
-   [quanta.trade.entry-signal.rule :as rule]
+   [quanta.trade.entry-signal.core :as rule]
    [quanta.trade.backtest.commander :refer [create-position-commander]]
    [quanta.trade.backtest.from-entry :refer [from-algo-ds]]))
 
