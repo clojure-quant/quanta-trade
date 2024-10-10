@@ -1,7 +1,5 @@
 (ns quanta.trade.backtest2
   (:require
-   [tech.v3.dataset :as tds]
-   [tablecloth.api :as tc]
    [missionary.core :as m]
    [quanta.trade.commander :as cmd]
    [quanta.trade.entry-signal.core :as rule]
@@ -13,7 +11,7 @@
   (assert rm "algo-action needs :rm env")
   (assert rm "algo-action needs :commander env")
   (m/ap 
-      (let [{:keys [data entry-signal]} (m/?> entry-data-flow)]
+      (let [{:keys [data entry-signal shutdown]} (m/?> entry-data-flow)]
          (m/? (m/sleep 10))
          ;; from algo
          ;; first check exits.
@@ -27,7 +25,13 @@
             (let [position (rule/create-entry rm data)]
               (println "sending entry: " position)
               (cmd/open! commander position)))
-        data)))
+        
+         (if shutdown
+           {:shutdown true}
+           data) 
+
+        )))
+
 
 
  (defn batch-combiner [r v]
@@ -73,19 +77,21 @@
                                                  command-seq
                                                  [command-seq])]
                                ;(println "command-seq2: " command-seq)
-                             (doall (map (fn [{:keys [open close] :as cmd-update}]
+                             (doall (map (fn [{:keys [open close shutdown] :as cmd-update}]
                                            ;(println "cmd-update: " cmd-update)
                                            (when open
                                            ; {:side :long, :asset EUR/USD, :qty 1.0, :entry-idx 3, :entry-date nil, :entry-price 80, :id EOG7TD}
                                              (rule/on-position-open rm open))
                                            (when close 
-                                             (rule/on-position-close rm close))) command-seq))))
-                         ;(when shutdown
-                         ;  (println "algo-backtest has shutdown!")
-                         ;  (done :shutdown)
-                         ;  (cmd/shutdown! commander))
-                         ;; from commander
+                                             (rule/on-position-close rm close))) 
+                                         command-seq))))
+                            ;; from commander
                             (println "signal-action: " signal-action)
+                            (when (:shutdown signal-action)
+                               (println "algo-backtest has shutdown!")
+                                (done :shutdown)
+                               ;  (cmd/shutdown! commander)
+                              )
                            ))
                          nil mixed-flow)]
 
