@@ -15,7 +15,7 @@
 ;; entry
 
 (defn create-entry [this data]
-  (println "rule/create-entry: " data)
+  ;(println "rule/create-entry: " data)
   (entry/create-position this data))
 
 ; on position open/close
@@ -34,14 +34,14 @@
    we need to start new exit-rules for a new position here."
   [{:keys [exit-rules positions]}  position]
   (assert exit-rules "rule manager state needs to have :exit-rules")
-  (println "rule/on-position-open: " position)
+  ;(println "rule/on-position-open: " position)
   (swap! positions assoc
          (:id position)
          {:position position
           :manager (create-exit-manager-for-position exit-rules position)}))
 
 (defn on-position-close [{:keys [positions]} position]
-  (println "rule/on-position-close: " position)
+  ;(println "rule/on-position-close: " position)
   (swap! positions dissoc (:id position)))
 
 (defn check-exit-position [{:keys [position manager]} row]
@@ -65,7 +65,7 @@
        :exit-date date})))
 
 (defn check-exit [{:keys [positions]} row]
-  (println "rule/check-exit: " row)
+  ;(println "rule/check-exit: " row)
   (->> (vals @positions)
        (map #(check-exit-position % row))
        (remove nil?)))

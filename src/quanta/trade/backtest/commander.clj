@@ -38,13 +38,13 @@
        (assert side "open-position needs :side")
        (assert qty "open-position needs :qty")
        (assert entry-price "open-position needs :entry-price")
-       (println "commander/open! " position)
+       ;(println "commander/open! " position)
        (send-action! {:open position})
        position))
   (close! [_ {:keys [id exit-price] :as position}]
      ;(assert id "close-position needs :id")
      ;(assert exit-price "close-position needs :exit-price")
-    (println "commander/close! " position)
+    ;(println "commander/close! " position)
     (send-action! {:close position})
     position)
   (position-change-flow [_]

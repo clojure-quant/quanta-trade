@@ -20,12 +20,12 @@
          (when data
             (let [exits (rule/check-exit rm data)]
               (when (seq exits)
-                (println "sending exits: " exits)  
+                ;(println "sending exits: " exits)  
                 (doall (map #(cmd/close! commander %) exits)))))
          ;; second check entries.
          (when (and data entry-signal)
             (let [position (rule/create-entry rm data)]
-              (println "sending entry: " position)
+              ;(println "sending entry: " position)
               (cmd/open! commander position)))
         ; return data:
          (if shutdown
@@ -34,7 +34,7 @@
 
 
  (defn batch-combiner [r v]
-   (println "batch: " r v)
+   ;(println "batch: " r v)
    (if (vector? r)
      (conj r v)
      [r v]))
@@ -51,7 +51,7 @@
              action-flow))
 
 (defn backtest [{:keys [asset entry exit] :as opts} bar-ds]
-  (println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
+  ;(println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
   (let [entry-data-flow (from-algo-ds bar-ds)
         commander (create-position-commander) ; a simplified version of a broker-api
         rm (rule/create-entrysignal-manager opts)
@@ -62,7 +62,7 @@
         done (m/mbx)
         roundtrips-a (atom [])
         acc-rts-task (m/reduce (fn [r rt]
-                          (println "roundtrip complete: " rt)       
+                          ;(println "roundtrip complete: " rt)       
                           (swap! roundtrips-a conj rt))
                                nil
                           (cmd/position-roundtrip-flow commander))
@@ -86,9 +86,9 @@
                                              (rule/on-position-close rm close))) 
                                          command-seq))))
                             ;; from commander
-                            (println "signal-action: " signal-action)
+                            ;(println "signal-action: " signal-action)
                             (when (:shutdown signal-action)
-                               (println "algo-backtest has shutdown!")
+                               ;(println "algo-backtest has shutdown!")
                                 (done :shutdown)
                                ;  (cmd/shutdown! commander)
                               )

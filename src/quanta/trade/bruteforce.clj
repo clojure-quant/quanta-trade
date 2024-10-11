@@ -4,6 +4,9 @@
    [tick.core :as t]
    [taoensso.timbre :refer [info warn error]]
    [missionary.core :as m]
+   [nano-id.core :refer [nano-id]]
+   [babashka.fs :as fs]
+   [ta.db.bars.nippy :refer [save-ds]]
    [quanta.dag.core :as dag]
    [quanta.algo.core :as algo]
    [quanta.algo.options :refer [create-algo-variations]]))
@@ -50,15 +53,21 @@
     (catch Exception ex
       {})))
 
-(defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn]
+(defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn report-dir]
   ; needs to throw so it can fail.
-  ; returned tasks will not be cpu intensive, so m/cpu.
   (m/via m/cpu
-         (let [result (calculate-cell-once dag-env algo dt cell-id)
+         (let [id (nano-id 6)
+               result (calculate-cell-once dag-env algo dt cell-id)
                summary (summarize algo variations)
                target {:target (run-target-fn-safe target-fn result)}
-               show (run-show-fn-safe show-fn result)]
-           (merge summary target show))))
+               show (run-show-fn-safe show-fn result)
+               report (merge summary target show {:id id})]
+           (when report-dir 
+              (spit (str report-dir id "-result.edn") (pr-str report))  
+              (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
+              (save-ds (str report-dir id "-roundtrips.nippy.gz") (:roundtrip-ds result)))
+           report
+           )))
 
 (defn bruteforce
   "runs all variations on a template
@@ -78,22 +87,41 @@
      [:exit 1] [60 90]]
    "
   [dag-env {:keys [algo cell-id variations dt
-                   target-fn show-fn]
+                   target-fn show-fn
+                   label data-dir
+                   ]
             :or {show-fn (fn [result] {})
                  cell-id :backtest
-                 dt (t/instant)}}]
+                 dt (t/instant)
+                 data-dir ".data/bruteforce/"
+                 }}]
   ; from: https://github.com/leonoel/missionary/wiki/Rate-limiting#bounded-blocking-execution
   ; When using (via blk ,,,) It's important to remember that the blocking thread pool 
   ; is unbounded, which can potentially lead to out-of-memory exceptions. 
   ; A simple way to work around it is by using a semaphore to rate limit the execution:
-  (let [sem (m/sem 10)
+  (let [report-dir (when label 
+                     (let [report-dir (str data-dir label "/")]
+                         (fs/delete-tree report-dir)                       
+                         (fs/create-dirs report-dir)
+                         report-dir))
+        sem (m/sem 10)
         algo-seq (create-algo-variations algo variations)
-        tasks (map #(create-algo-task dag-env % cell-id dt variations target-fn show-fn) algo-seq)
+        tasks (map #(create-algo-task dag-env % cell-id dt variations target-fn show-fn report-dir) algo-seq)
         ;tasks-limited (map #(limit-task sem %) tasks)
         ]
     (info "brute force backtesting " (count tasks) " variations ..")
     (let [result (m/?
-                  (apply m/join vector tasks))]
-      (->> result
-           (sort-by :target)
-           (reverse)))))
+                  (apply m/join vector tasks))
+          result (->> result
+                      (sort-by :target)
+                      (reverse))]
+       (when label
+        (let [report-filename (str data-dir label ".edn")]
+          (spit report-filename
+                (pr-str {:label label
+                         :algo algo
+                         :variations variations
+                         :result result
+                         }))))
+      result
+      )))

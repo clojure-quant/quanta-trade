@@ -58,7 +58,9 @@
                  :variations variations
                  :target-fn get-pf
                  :show-fn show-fn
-                 :dt dt})
+                 :dt dt
+                 :label "brute1"
+                 })
     print-table)
 
 ; | [0 :asset] | [2 :day :atr-n] |            :target | :trades |

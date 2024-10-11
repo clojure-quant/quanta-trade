@@ -71,7 +71,7 @@
                 [label level]))
           new-level (adjust-level-fn position level row)]
       (when new-level
-        (println "TrailingTakeProfit changes to: " level)
+        ;(println "TrailingTakeProfit changes to: " level)
         (reset! level new-level))
       r)))
 
@@ -89,7 +89,7 @@
                 [label @level-a])))
           ; second calculate new level, and possibly move level
           unchecked-level (new-level-fn position @level-a row)
-          _ (println "trailing unchecked-level: " unchecked-level)
+          ;_ (println "trailing unchecked-level: " unchecked-level)
           new-level (case (:side position)
                       :short 
                       (when (or (nil? @level-a)
@@ -100,12 +100,12 @@
                                 (> unchecked-level @level-a))
                         unchecked-level))]
       (when new-level
-        (println "TrailingStopLoss changes from " @level-a " to: " new-level)
+        ;(println "TrailingStopLoss changes from " @level-a " to: " new-level)
         (reset! level-a new-level))
-      (when (not new-level)
-        (println "TrailingStopLoss unchanged level: " @level-a 
-                 " side: " (:side position) " unchecked level: " unchecked-level)
-        )
+      ;(when (not new-level)
+        ;(println "TrailingStopLoss unchanged level: " @level-a 
+        ;         " side: " (:side position) " unchecked level: " unchecked-level)
+        ;)
       r)))
 
 
