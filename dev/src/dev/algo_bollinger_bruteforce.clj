@@ -49,7 +49,6 @@
 (defn get-pf [r]
   (-> r :metrics :roundtrip :pf))
 
-
 (defn show-fn [r]
   (-> r :metrics :roundtrip (select-keys [:trades])))
 
@@ -70,3 +69,12 @@
 ; |    BTCUSDT |              20 | 0.6040295470644278 |     126 |
 ; |    ETHUSDT |              50 | 0.4967416107940467 |     131 |
 ; |    ETHUSDT |              20 | 0.4967416107940467 |     131 |
+
+
+
+(-> ".data/bruteforce/brute1.edn"
+    slurp
+    read-string
+ )
+
+

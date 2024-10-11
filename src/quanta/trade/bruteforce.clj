@@ -6,20 +6,20 @@
    [missionary.core :as m]
    [nano-id.core :refer [nano-id]]
    [babashka.fs :as fs]
-   [quanta.trade.backtest.store :refer [ds->nippy nippy->ds ds->transit-json-file]]
+   [modular.fipp :refer [pprint-str]]
    [quanta.dag.core :as dag]
    [quanta.algo.core :as algo]
-   [quanta.algo.options :refer [create-algo-variations]]))
+   [quanta.algo.options :refer [create-algo-variations]]
+   [quanta.trade.backtest.store :refer [ds->nippy nippy->ds ds->transit-json-file]]))
 
 (defn calculate-cell-once
-    "creates a snapshot dag as of dt from an algo spec, 
+  "creates a snapshot dag as of dt from an algo spec, 
    and calculates and returns cell-id"
-    [dag-env algo-spec dt cell-id]
-    (let [d (-> (dag/create-dag dag-env)
-                (algo/add-env-time-snapshot dt)
-                (algo/add-algo algo-spec))]
-      (dag/get-current-valid-value d cell-id)))
-
+  [dag-env algo-spec dt cell-id]
+  (let [d (-> (dag/create-dag dag-env)
+              (algo/add-env-time-snapshot dt)
+              (algo/add-algo algo-spec))]
+    (dag/get-current-valid-value d cell-id)))
 
 (defn variation-keys [variations]
   (->> variations
@@ -54,12 +54,11 @@
       {})))
 
 (defn save-ds [report-dir id ds]
-    (let [fname-nippy (str report-dir id "-roundtrips.nippy.gz")
-          fname-transit (str report-dir id "-roundtrips.transit-json")
-          _ (ds->nippy fname-nippy ds)
-          ds-safe (nippy->ds fname-nippy)]
-      (ds->transit-json-file fname-transit ds-safe)))
-
+  (let [fname-nippy (str report-dir id "-roundtrips.nippy.gz")
+        fname-transit (str report-dir id "-roundtrips.transit-json")
+        _ (ds->nippy fname-nippy ds)
+        ds-safe (nippy->ds fname-nippy)]
+    (ds->transit-json-file fname-transit ds-safe)))
 
 (defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn report-dir]
   ; needs to throw so it can fail.
@@ -70,12 +69,22 @@
                target {:target (run-target-fn-safe target-fn result)}
                show (run-show-fn-safe show-fn result)
                report (merge summary target show {:id id})]
-           (when report-dir 
-              (spit (str report-dir id "-result.edn") (pr-str report))  
-              (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
-              (save-ds report-dir id (:roundtrip-ds result)))
-           report
-           )))
+           (when report-dir
+             (spit (str report-dir id "-result.edn") (pr-str report))
+             (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
+             (save-ds report-dir id (:roundtrip-ds result)))
+           report)))
+
+(defn safe-algo-one [x]
+  (if (map? x)
+    (dissoc x :algo)
+    x))
+
+(defn safe-algo [algo-spec]
+  (if (map? algo-spec)
+    (dissoc algo-spec :algo)
+    (->> (map safe-algo-one algo-spec)
+         (into []))))
 
 (defn bruteforce
   "runs all variations on a template
@@ -96,22 +105,20 @@
    "
   [dag-env {:keys [algo cell-id variations dt
                    target-fn show-fn
-                   label data-dir
-                   ]
+                   label data-dir]
             :or {show-fn (fn [result] {})
                  cell-id :backtest
                  dt (t/instant)
-                 data-dir ".data/bruteforce/"
-                 }}]
+                 data-dir ".data/bruteforce/"}}]
   ; from: https://github.com/leonoel/missionary/wiki/Rate-limiting#bounded-blocking-execution
   ; When using (via blk ,,,) It's important to remember that the blocking thread pool 
   ; is unbounded, which can potentially lead to out-of-memory exceptions. 
   ; A simple way to work around it is by using a semaphore to rate limit the execution:
-  (let [report-dir (when label 
+  (let [report-dir (when label
                      (let [report-dir (str data-dir label "/")]
-                         (fs/delete-tree report-dir)                       
-                         (fs/create-dirs report-dir)
-                         report-dir))
+                       (fs/delete-tree report-dir)
+                       (fs/create-dirs report-dir)
+                       report-dir))
         sem (m/sem 10)
         algo-seq (create-algo-variations algo variations)
         tasks (map #(create-algo-task dag-env % cell-id dt variations target-fn show-fn report-dir) algo-seq)
@@ -123,13 +130,12 @@
           result (->> result
                       (sort-by :target)
                       (reverse))]
-       (when label
+      (when label
         (let [report-filename (str data-dir label ".edn")]
           (spit report-filename
-                (pr-str {:label label
-                         :algo algo
-                         :variations variations
-                         :result result
-                         }))))
-      result
-      )))
+                (pprint-str {:label label
+                             :calculated (t/instant)
+                             :algo (safe-algo algo)
+                             :variations variations
+                             :result result}))))
+      result)))

@@ -19,8 +19,6 @@
       (dag/add-cell :position-update (position-change-flow commander))
       (dag/add-cell :roundtrip (position-roundtrip-flow commander))))
 
-
-
 (defn start-logging [file-name flow]
   (let [print-task (m/reduce (fn [r v]
                                (let [s (with-out-str (println v))]

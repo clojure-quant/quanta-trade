@@ -20,7 +20,7 @@
 (defrecord StopLoss [position level label]
   IExit
   (priority [_]
-            1)
+    1)
   (check-exit [_ {:keys [high low]}]
     (case (:side position)
       :short
@@ -33,7 +33,7 @@
 (defrecord MaxTime [position max-idx label]
   IExit
   (priority [_]
-            3)
+    3)
   (check-exit [_ {:keys [idx close]}]
     (when (>= idx max-idx)
       [label close])))
@@ -57,8 +57,6 @@
   (check-exit mt {:idx 10 :close 5000})
   ;
   )
-
-
 (defrecord TrailingTakeProfit [position level adjust-level-fn label]
   IExit
   (check-exit [_ {:keys [high low] :as row}]
@@ -81,22 +79,22 @@
     (let [; first check if there is an exit at current level
           r (when (not (nil? @level-a))
               (case (:side position)
-              :short
-              (when (>= high @level-a)
-                [label @level-a])
-              :long
-              (when (<= low @level-a)
-                [label @level-a])))
+                :short
+                (when (>= high @level-a)
+                  [label @level-a])
+                :long
+                (when (<= low @level-a)
+                  [label @level-a])))
           ; second calculate new level, and possibly move level
           unchecked-level (new-level-fn position @level-a row)
           ;_ (println "trailing unchecked-level: " unchecked-level)
           new-level (case (:side position)
-                      :short 
+                      :short
                       (when (or (nil? @level-a)
                                 (< unchecked-level @level-a))
                         unchecked-level)
-                      :long 
-                      (when (or (nil? @level-a) 
+                      :long
+                      (when (or (nil? @level-a)
                                 (> unchecked-level @level-a))
                         unchecked-level))]
       (when new-level
@@ -108,12 +106,11 @@
         ;)
       r)))
 
-
 (defrecord MultipleRules [rules]
   IExit
   (check-exit [_ {:keys [high low] :as row}]
-     (->> rules
-          (map #(check-exit % row))
-          (remove nil?)
-          first)))
+    (->> rules
+         (map #(check-exit % row))
+         (remove nil?)
+         first)))
 

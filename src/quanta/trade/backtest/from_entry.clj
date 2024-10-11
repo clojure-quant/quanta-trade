@@ -9,7 +9,7 @@
                (tc/select-rows idx)
                (tds/mapseq-reader ds))
         v (into [] ds)]
-     (last v)))
+    (last v)))
 
 (defn from-algo-cell [algo-cell]
   (m/stream
@@ -21,20 +21,18 @@
                (let [row (row-at ds-idx idx)
                      output {:data row}
                      entry (:entry row)
-                     output (case entry 
-                               :long (assoc output :entry-signal entry)
-                               :short (assoc output :entry-signal entry)
-                               output)]
+                     output (case entry
+                              :long (assoc output :entry-signal entry)
+                              :short (assoc output :entry-signal entry)
+                              output)]
                  (if (< (inc idx) n)
                    (m/amb
-                      output
-                      (recur (inc idx)))
+                    output
+                    (recur (inc idx)))
                    (m/amb (assoc output :shutdown true)
-                          (reduced {:shutdown :now})
-                          )))))))))
-
+                          (reduced {:shutdown :now}))))))))))
 
 (defn from-algo-ds [ds]
   (let [algo-cell (m/seed [ds])]
     (from-algo-cell algo-cell)))
-  
+

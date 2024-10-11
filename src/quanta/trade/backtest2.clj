@@ -8,47 +8,44 @@
    [quanta.trade.backtest.from-entry :refer [from-algo-ds]]
    [ta.trade.roundtrip.core :refer [roundtrip-stats]]))
 
-
 (defn algo-action [{:keys [rm commander]} entry-data-flow]
   (assert rm "algo-action needs :rm env")
   (assert rm "algo-action needs :commander env")
-  (m/ap 
-      (let [{:keys [data entry-signal shutdown]} (m/?> entry-data-flow)]
-         (m/? (m/sleep 10))
+  (m/ap
+   (let [{:keys [data entry-signal shutdown]} (m/?> entry-data-flow)]
+     (m/? (m/sleep 10))
          ;; from algo
          ;; first check exits.
-         (when data
-            (let [exits (rule/check-exit rm data)]
-              (when (seq exits)
+     (when data
+       (let [exits (rule/check-exit rm data)]
+         (when (seq exits)
                 ;(println "sending exits: " exits)  
-                (doall (map #(cmd/close! commander %) exits)))))
+           (doall (map #(cmd/close! commander %) exits)))))
          ;; second check entries.
-         (when (and data entry-signal)
-            (let [position (rule/create-entry rm data)]
+     (when (and data entry-signal)
+       (let [position (rule/create-entry rm data)]
               ;(println "sending entry: " position)
-              (cmd/open! commander position)))
+         (cmd/open! commander position)))
         ; return data:
-         (if shutdown
-           {:shutdown true}
-           data))))
+     (if shutdown
+       {:shutdown true}
+       data))))
 
-
- (defn batch-combiner [r v]
+(defn batch-combiner [r v]
    ;(println "batch: " r v)
-   (if (vector? r)
-     (conj r v)
-     [r v]))
+  (if (vector? r)
+    (conj r v)
+    [r v]))
 
 (defn wrap-batch [f]
   (->> f
        (m/relieve batch-combiner)
        (m/reductions {} [])))
 
-
- (defn mix-flows [action-flow position-change-flow]
-   (m/sample vector
-             (wrap-batch position-change-flow)
-             action-flow))
+(defn mix-flows [action-flow position-change-flow]
+  (m/sample vector
+            (wrap-batch position-change-flow)
+            action-flow))
 
 (defn backtest [{:keys [asset entry exit] :as opts} bar-ds]
   ;(println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
@@ -63,9 +60,9 @@
         roundtrips-a (atom [])
         acc-rts-task (m/reduce (fn [r rt]
                           ;(println "roundtrip complete: " rt)       
-                          (swap! roundtrips-a conj rt))
+                                 (swap! roundtrips-a conj rt))
                                nil
-                          (cmd/position-roundtrip-flow commander))
+                               (cmd/position-roundtrip-flow commander))
         prior-command-seq (atom [])
         task (m/reduce (fn [r x]
                          ;(println "x: " x)
@@ -77,32 +74,29 @@
                                                  command-seq
                                                  [command-seq])]
                                ;(println "command-seq2: " command-seq)
-                             (doall (map (fn [{:keys [open close shutdown] :as cmd-update}]
+                               (doall (map (fn [{:keys [open close shutdown] :as cmd-update}]
                                            ;(println "cmd-update: " cmd-update)
-                                           (when open
+                                             (when open
                                            ; {:side :long, :asset EUR/USD, :qty 1.0, :entry-idx 3, :entry-date nil, :entry-price 80, :id EOG7TD}
-                                             (rule/on-position-open rm open))
-                                           (when close 
-                                             (rule/on-position-close rm close))) 
-                                         command-seq))))
+                                               (rule/on-position-open rm open))
+                                             (when close
+                                               (rule/on-position-close rm close)))
+                                           command-seq))))
                             ;; from commander
                             ;(println "signal-action: " signal-action)
-                            (when (:shutdown signal-action)
+                           (when (:shutdown signal-action)
                                ;(println "algo-backtest has shutdown!")
-                                (done :shutdown)
+                             (done :shutdown)
                                ;  (cmd/shutdown! commander)
-                              )
-                           ))
-                         nil mixed-flow)]
+                             )))
+                       nil mixed-flow)]
 
     ;(m/? task)
-    (m/? (m/race task done 
-                 acc-rts-task
-                 ))
-    (let [roundtrips (tc/dataset @roundtrips-a) 
+    (m/? (m/race task done
+                 acc-rts-task))
+    (let [roundtrips (tc/dataset @roundtrips-a)
           rt-stats (roundtrip-stats roundtrips)]
-      rt-stats
-      )))
+      rt-stats)))
 
 
 

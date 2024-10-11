@@ -26,6 +26,5 @@
 (defn save-ds-transit-safe [fname ds]
   (let [fname-tmp "/tmp/ds.nippy.gz"
         _ (ds->nippy fname-tmp ds)
-        ds-safe (nippy->ds fname-tmp)
-        ]
+        ds-safe (nippy->ds fname-tmp)]
     (ds->transit-json-file fname ds-safe)))

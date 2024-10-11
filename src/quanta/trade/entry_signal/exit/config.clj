@@ -2,9 +2,9 @@
   (:require
    [quanta.trade.entry-signal.exit.position :as e])
   (:import
-   [quanta.trade.entry_signal.exit.position 
-    TakeProfit 
-    StopLoss TrailingStopLoss 
+   [quanta.trade.entry_signal.exit.position
+    TakeProfit
+    StopLoss TrailingStopLoss
     MaxTime
     MultipleRules]))
 
@@ -39,13 +39,12 @@
       (StopLoss. position level label))))
 
 (defmethod exit-rule :time [{:keys [label max-bars]
-                                  :or {label :time}}]
+                             :or {label :time}}]
   (assert max-bars "stop-time needs :max-bars parameter")
   (fn [{:keys [entry-idx] :as position}]
     (assert entry-idx "stop-time needs :position :entry-idx")
     (let [max-idx (+ entry-idx max-bars)]
       (MaxTime. position max-idx label))))
-
 
 (defmethod exit-rule :trailing-stop-offset [{:keys [col label]
                                              :or {label :trailing-stop}}]
@@ -61,7 +60,7 @@
                                close (:close row)
                                offset (get row col)]
                            ;(println "trailing offset: " offset " close: " close " level: " level "entry: " entry-price)
-                           (if level 
+                           (if level
                              (case side
                                :long (- close offset)
                                :short (+ close offset))
