@@ -6,7 +6,7 @@
    [missionary.core :as m]
    [nano-id.core :refer [nano-id]]
    [babashka.fs :as fs]
-   [ta.db.bars.nippy :refer [save-ds]]
+   [quanta.trade.backtest.store :refer [ds->nippy nippy->ds ds->transit-json-file]]
    [quanta.dag.core :as dag]
    [quanta.algo.core :as algo]
    [quanta.algo.options :refer [create-algo-variations]]))
@@ -53,6 +53,14 @@
     (catch Exception ex
       {})))
 
+(defn save-ds [report-dir id ds]
+    (let [fname-nippy (str report-dir id "-roundtrips.nippy.gz")
+          fname-transit (str report-dir id "-roundtrips.transit-json")
+          _ (ds->nippy fname-nippy ds)
+          ds-safe (nippy->ds fname-nippy)]
+      (ds->transit-json-file fname-transit ds-safe)))
+
+
 (defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn report-dir]
   ; needs to throw so it can fail.
   (m/via m/cpu
@@ -65,7 +73,7 @@
            (when report-dir 
               (spit (str report-dir id "-result.edn") (pr-str report))  
               (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
-              (save-ds (str report-dir id "-roundtrips.nippy.gz") (:roundtrip-ds result)))
+              (save-ds report-dir id (:roundtrip-ds result)))
            report
            )))
 

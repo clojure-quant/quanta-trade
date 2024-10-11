@@ -4,7 +4,7 @@
         de.otto/nom {:mvn/version "0.3.0"}
         tick/tick {:mvn/version "0.6.2"}
         org.pinkgorilla/timbre {:mvn/version "0.0.7"}
-        scicloj/tablecloth {:mvn/version "7.021"} ; brings techml-dataset
+        scicloj/tablecloth {:mvn/version "7.029.2"} ; ensure clj-transit is there for sure.
         babashka/fs {:mvn/version "0.5.22"} ; create log dir
         io.github.clojure-quant/quanta {:mvn/version "0.4.866"}
         io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.1.8"}}

@@ -49,6 +49,7 @@
 (defn get-pf [r]
   (-> r :metrics :roundtrip :pf))
 
+
 (defn show-fn [r]
   (-> r :metrics :roundtrip (select-keys [:trades])))
 
