@@ -62,15 +62,14 @@
                  :label "brute1"})
     print-table)
 
-; | [0 :asset] | [2 :day :atr-n] |            :target | :trades |
-; |------------+-----------------+--------------------+---------|
-; |    BTCUSDT |              50 | 0.6040295470644278 |     126 |
-; |    BTCUSDT |              20 | 0.6040295470644278 |     126 |
-; |    ETHUSDT |              50 | 0.4967416107940467 |     131 |
-; |    ETHUSDT |              20 | 0.4967416107940467 |     131 |
+; | [0 :asset] | [2 :day :atr-n] |            :target | :trades |    :id |
+; |------------+-----------------+--------------------+---------+--------|
+; |    BTCUSDT |              50 | 0.5196291340803781 |     128 | ckdJDj |
+; |    BTCUSDT |              20 | 0.5196291340803781 |     128 | qQsof9 |
+; |    ETHUSDT |              50 |  0.471267441188845 |     134 | JNSsjP |
+; |    ETHUSDT |              20 |  0.471267441188845 |     134 | BWR3q4 |
 
-(-> ".data/bruteforce/brute1.edn"
-    slurp
-    read-string)
+(bf/show-available ".data/bruteforce/")
+;; => ("brute1")
 
-
+(bf/load-label ".data/bruteforce/" "brute1")

@@ -60,6 +60,13 @@
         ds-safe (nippy->ds fname-nippy)]
     (ds->transit-json-file fname-transit ds-safe)))
 
+(defn save-backtest [report-dir id backtest]
+  (let [fname-nippy (str report-dir id "-backtest.nippy.gz")
+        fname-transit (str report-dir id "-backtest.transit-json")
+        _ (ds->nippy fname-nippy backtest)
+        ds-safe (nippy->ds fname-nippy)]
+    (ds->transit-json-file fname-transit ds-safe)))
+
 (defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn report-dir]
   ; needs to throw so it can fail.
   (m/via m/cpu
@@ -72,7 +79,8 @@
            (when report-dir
              (spit (str report-dir id "-result.edn") (pr-str report))
              (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
-             (save-ds report-dir id (:roundtrip-ds result)))
+             (save-ds report-dir id (:roundtrip-ds result))
+             (save-backtest report-dir id result))
            report)))
 
 (defn safe-algo-one [x]
@@ -105,10 +113,13 @@
    "
   [dag-env {:keys [algo cell-id variations dt
                    target-fn show-fn
-                   label data-dir]
+                   label
+                   template-id
+                   data-dir]
             :or {show-fn (fn [result] {})
                  cell-id :backtest
                  dt (t/instant)
+                 template-id nil
                  data-dir ".data/bruteforce/"}}]
   ; from: https://github.com/leonoel/missionary/wiki/Rate-limiting#bounded-blocking-execution
   ; When using (via blk ,,,) It's important to remember that the blocking thread pool 
@@ -134,8 +145,32 @@
         (let [report-filename (str data-dir label ".edn")]
           (spit report-filename
                 (pprint-str {:label label
+                             :template-id template-id
                              :calculated (t/instant)
                              :algo (safe-algo algo)
                              :variations variations
                              :result result}))))
       result)))
+
+(defn cut-extension [filename]
+  (subs filename 0 (- (count filename) 4)))
+
+;; exploration
+
+(defn show-available
+  "returns a seq of labels, this are templates that have been bruteforced 
+   with :label set; the results can be explored in quanta-studio."
+  [dir]
+  (->> (fs/list-dir dir  "*.edn")
+       (map fs/file-name)
+       (map cut-extension)))
+
+(defn load-label
+  "loads template-label summary for a previously generated bruteforce.
+   dir must have / in the end"
+  [dir label]
+  (-> (str dir label ".edn")
+      slurp
+      read-string))
+
+
