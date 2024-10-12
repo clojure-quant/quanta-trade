@@ -1,13 +1,13 @@
-(ns ta.trade.roundtrip.core
+(ns quanta.trade.report.roundtrip
   (:require
    [de.otto.nom.core :as nom]
    [taoensso.timbre :as timbre :refer [error]]
    [tech.v3.dataset :as tds]
-   [ta.trade.roundtrip.validation :refer [validate-roundtrips-ds]]
-   [ta.trade.roundtrip.roundtrip :refer [add-performance]]
-   [ta.trade.roundtrip.metrics :refer [calc-roundtrip-metrics]]
-   [ta.trade.roundtrip.nav.metrics :refer [calc-nav-metrics]]
-   [ta.trade.roundtrip.nav.grouped :refer [grouped-nav]]))
+   [quanta.trade.report.roundtrip.validation :refer [validate-roundtrips-ds]]
+   [quanta.trade.report.roundtrip.performance :refer [add-performance]]
+   [quanta.trade.report.roundtrip.metrics :refer [calc-roundtrip-metrics]]
+   [quanta.trade.report.roundtrip.nav.metrics :refer [calc-nav-metrics]]
+   [quanta.trade.report.roundtrip.nav.grouped :refer [grouped-nav]]))
 
 (defn- roundtrip-stats-impl [roundtrip-ds]
   (let [vr (validate-roundtrips-ds roundtrip-ds)]

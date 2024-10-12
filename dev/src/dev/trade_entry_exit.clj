@@ -3,7 +3,7 @@
    [tick.core :as t]
    [tablecloth.api :as tc]
    [ta.trade.backtest.from-entry :refer [entry-signal->roundtrips]]
-   [ta.trade.roundtrip.core :refer [roundtrip-stats]]
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]
    [quanta.viz.plot.trade.core :refer [roundtrip-stats-ui]]))
 
 (def ds (tc/dataset {:date (repeatedly 6 #(t/instant))
@@ -39,7 +39,7 @@ rts
                           :bars-above-b1h 51
                           :d [1.0 Double/NaN nil]}))
 
-(require '[ta.trade.roundtrip.validation :refer [validate-roundtrips validate-roundtrips-ds]])
+(require '[quanta.trade.report.roundtrip.validation :refer [validate-roundtrips validate-roundtrips-ds]])
 (require '[tech.v3.dataset :as tds])
 (->>  alex-ds
       (entry-signal->roundtrips {:asset "BTC"
@@ -50,6 +50,6 @@ rts
       :roundtrips
       ;    (validate-roundtrips-ds)
       (roundtrip-stats))
-    
-    
+
+
 

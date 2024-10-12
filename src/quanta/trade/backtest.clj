@@ -2,7 +2,7 @@
   (:require
    [tablecloth.api :as tc]
    [ta.trade.backtest.from-entry :refer [entry-signal->roundtrips]]
-   [ta.trade.roundtrip.core :refer [roundtrip-stats]]))
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]))
 
 (defn backtest
   "uses :entry column in bar-ds to create roundtrips

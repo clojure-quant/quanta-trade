@@ -1,9 +1,9 @@
-(ns ta.trade.roundtrip.roundtrip
+(ns quanta.trade.report.roundtrip.performance
   (:require
    [tech.v3.datatype :as dtype]
    [tech.v3.datatype.functional :as dfn]
    [tablecloth.api :as tc]
-   [ta.trade.roundtrip :refer [sign-switch]]))
+   [quanta.trade.report.roundtrip.return :refer [sign-switch]]))
 
 (defn- adjust [val-vec side-vec]
   (dtype/emap sign-switch :float64 side-vec val-vec))

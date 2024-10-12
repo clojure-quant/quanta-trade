@@ -29,4 +29,23 @@
                "--config" "cljkondo.edn"
                "--fail-level" "error"
                "--lint"
-               "./src"]}}}
+               "./src"]}
+  
+    :cljfmt
+  {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}
+   :main-opts ["-m" "cljfmt.main"
+               "--indents" "cljfmt.edn"
+               "check"
+               "./src"
+               "./dev/src"]}
+  
+  :cljfmt-fix
+  {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}
+   :main-opts ["-m" "cljfmt.main"
+               "--indents" "cljfmt.edn"
+               "fix"
+               "./src"
+               "./dev/src"]}
+  
+  
+  }}

@@ -59,8 +59,7 @@
                  :target-fn get-pf
                  :show-fn show-fn
                  :dt dt
-                 :label "brute1"
-                 })
+                 :label "brute1"})
     print-table)
 
 ; | [0 :asset] | [2 :day :atr-n] |            :target | :trades |
@@ -70,11 +69,8 @@
 ; |    ETHUSDT |              50 | 0.4967416107940467 |     131 |
 ; |    ETHUSDT |              20 | 0.4967416107940467 |     131 |
 
-
-
 (-> ".data/bruteforce/brute1.edn"
     slurp
-    read-string
- )
+    read-string)
 
 

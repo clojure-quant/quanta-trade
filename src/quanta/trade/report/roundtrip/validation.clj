@@ -1,4 +1,4 @@
-(ns ta.trade.roundtrip.validation
+(ns quanta.trade.report.roundtrip.validation
   (:require
    [de.otto.nom.core :as nom]
    [tick.core :as t]
@@ -24,8 +24,8 @@
    [:asset :string]
    [:side [:enum :long :short]]
    [:qty [:double]]
-   [:entry-price [:double {:min ta.trade.roundtrip.validation/above-zero}]]
-   [:exit-price [:double {:min ta.trade.roundtrip.validation/above-zero}]]
+   [:entry-price [:double {:min quanta.trade.report.roundtrip.validation/above-zero}]]
+   [:exit-price [:double {:min quanta.trade.report.roundtrip.validation/above-zero}]]
    [:entry-date [:or :time/local-date :time/local-date-time :time/zoned-date-time :time/instant]]
    [:exit-date  [:or :time/local-date :time/local-date-time :time/zoned-date-time :time/instant]]
    [:entry-idx {:optional true} [:int]]

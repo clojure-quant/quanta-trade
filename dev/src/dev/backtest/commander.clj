@@ -31,7 +31,6 @@ c
 ;; => ({:id "oCO0VF", :side :long, :qty 10, :price-entry 5000, :asset "BTC"}
 ;;     {:id "8bUhyG", :side :long, :qty 10, :price-entry 5000, :asset "BTC"})
 
-
 (cmd/close! c (assoc pos1 :price 7000))
 ;; => {:asset "BTC", :side :long, :qty 10, :price 7000, :id "oCO0VF"}
 

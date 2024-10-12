@@ -3,7 +3,7 @@
    [tick.core :as t]
    [tablecloth.api :as tc]
    [ta.trade.backtest.from-position :refer [signal->roundtrips]]
-   [ta.trade.roundtrip.core :refer [roundtrip-stats]]
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]
    [quanta.viz.plot.trade.core :refer [roundtrip-stats-ui]]))
 
 (def signal-ds (tc/dataset {:date [(t/instant "2020-01-01T00:00:00Z")

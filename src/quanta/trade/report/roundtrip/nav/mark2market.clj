@@ -1,4 +1,4 @@
-(ns ta.trade.roundtrip.nav.mark2market
+(ns quanta.trade.report.roundtrip.nav.mark2market
   (:require
    [taoensso.timbre :refer [trace debug info warn error]]
    [tick.core :as t]

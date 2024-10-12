@@ -18,6 +18,4 @@ ds
   (when entry-signal
     (info "entry-signal: " entry-signal)))
 
-
-
 (m/? (m/reduce process-row nil (from-algo-ds ds)))

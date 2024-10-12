@@ -27,21 +27,18 @@
 (def c (m/seed [:z (reduced :y) :x :w :v]))
 (def m (mix a b c))
 
-
 (m/? (print-task a))
 (m/? (print-task b))
 (m/? (print-task c))
 (m/? (print-task m))
-     
-      
- (m/? (print-task (m/eduction
-                 (take 3)
+
+(m/? (print-task (m/eduction
+                  (take 3)
                   scheduler)))
 
 (def print-inf (print-task scheduler))
 
 (def x (m/mbx))
-
 
 ((m/race print-inf x)
  #(println "success: " %)

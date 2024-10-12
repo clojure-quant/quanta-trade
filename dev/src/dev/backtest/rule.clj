@@ -1,5 +1,5 @@
 (ns dev.backtest.rule
-  (:require 
+  (:require
    [tick.core :as t]
    [quanta.trade.entry-signal.core :as rule]))
 
@@ -10,7 +10,6 @@
                 {:type :profit-prct :prct 5.0}]}))
 ;; => #'dev.backtest.rule/m
 
-
 m
 ;; => {:positions #<Atom@1938e715: {}>,
 ;;     :asset "EUR/USD",
@@ -19,15 +18,13 @@ m
 ;;     (#function[quanta.trade.entry-signal.exit.config/eval9125/fn--9127/fn--9130]
 ;;      #function[quanta.trade.entry-signal.exit.config/eval9125/fn--9127/fn--9130])}
 
-
-(rule/on-position-open m  {:id 5 
+(rule/on-position-open m  {:id 5
                            :asset "EUR/USD"
                            :side :long
                            :entry-price 1.10
                            :entry-idx 107
                            :entry-date (t/instant "2023-01-03T00:00:00Z")
-                           :qty 100000
-                           })
+                           :qty 100000})
 ;; => {5
 ;;     {:position
 ;;      {:id 5,
@@ -100,7 +97,7 @@ m
 ;;      :asset "EUR/USD",
 ;;      :exit-date #time/instant "2024-10-10T13:08:58.455516934Z"})
 
-(rule/check-exit m {:high 1.20 :low 1.09 :idx 1002 
+(rule/check-exit m {:high 1.20 :low 1.09 :idx 1002
                     :close 1.07 :date (t/instant) :entry :long})
 ;; => ({:entry-date #time/instant "2023-01-03T00:00:00Z",
 ;;      :entry-price 1.1,

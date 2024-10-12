@@ -1,4 +1,4 @@
-(ns ta.trade.roundtrip.metrics
+(ns quanta.trade.report.roundtrip.metrics
   (:require
    [clojure.set]
    [tablecloth.api :as tc]

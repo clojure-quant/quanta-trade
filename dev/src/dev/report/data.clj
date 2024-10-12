@@ -9,16 +9,14 @@
       (update :exit-date t/date)))
 
 (defn load-roundtrips []
-  (->> (slurp "roundtrips.edn")
+  (->> (slurp "demodata/roundtrips.edn")
        (edn/read-string)
        (map clean)))
 
-
-(comment 
+(comment
   (t/date "2023-01-10")
   (load-roundtrips)
-  
-  
+
 ;  
   )
 

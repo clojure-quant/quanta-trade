@@ -1,4 +1,4 @@
-(ns ta.trade.roundtrip.nav.metrics
+(ns quanta.trade.report.roundtrip.nav.metrics
   (:require
    [ta.indicator.drawdown :refer [drawdowns-from-value]]))
 

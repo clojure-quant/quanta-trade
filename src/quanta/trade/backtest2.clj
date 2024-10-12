@@ -6,7 +6,7 @@
    [quanta.trade.entry-signal.core :as rule]
    [quanta.trade.backtest.commander :refer [create-position-commander]]
    [quanta.trade.backtest.from-entry :refer [from-algo-ds]]
-   [ta.trade.roundtrip.core :refer [roundtrip-stats]]))
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]))
 
 (defn algo-action [{:keys [rm commander]} entry-data-flow]
   (assert rm "algo-action needs :rm env")
