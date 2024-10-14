@@ -14,9 +14,8 @@
   {:equity-final (last equity)
    :cum-pl (dfn/sum pl)
    :fee-total (dfn/sum fee)
-   :max-drawdown (apply dfn/max drawdown) ;  (apply max drawdown)
-   :max-drawdown-prct (apply dfn/max drawdown-prct)  ;  (apply max drawdown-prct)
-   })
+   :max-drawdown (apply dfn/max drawdown)
+   :max-drawdown-prct (apply dfn/max drawdown-prct)})
 (defn- roundtrip-stats-impl [portfolio roundtrip-ds]
   (let [vr (validate-roundtrips-ds roundtrip-ds)]
     (if (nom/anomaly? vr)

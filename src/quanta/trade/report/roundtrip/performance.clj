@@ -3,11 +3,14 @@
    [tech.v3.datatype :as dtype]
    [tech.v3.datatype.functional :as dfn]
    [tablecloth.api :as tc]
-   [ta.indicator.drawdown :refer [drawdowns-from-value]]
+   [ta.indicator.drawdown :refer [drawdowns-from-value xf-trailing-high]]
    [quanta.trade.report.roundtrip.return :refer [sign-switch]]))
 
 (defn- adjust [val-vec side-vec]
   (dtype/emap sign-switch :float64 side-vec val-vec))
+
+(defn maximum-equity [equity]
+  (into [] xf-trailing-high equity))
 
 (defn add-performance [{:keys [fee equity-initial]} roundtrip-ds]
   (let [roundtrip-ds (tc/order-by roundtrip-ds [:exit-date] [:asc])
@@ -23,9 +26,10 @@
                       (dfn/* entry-volume fee-m))
         pl (dfn/- pl-gross pl-fee)
         equity  (dfn/+ (dfn/cumsum pl) equity-initial)
+        equity-max (maximum-equity equity)
         ;; drawdown
         drawdown (drawdowns-from-value equity)
-        drawdown-prct (dfn/* (dfn// drawdown equity) 100.0)
+        drawdown-prct (dfn/* (dfn// drawdown equity-max) 100.0)
         ;; percent and log
         _ (println "prct/log")
         pl-points (adjust (dfn/- exit-price entry-price) side)
@@ -48,6 +52,7 @@
                      ;; drawdown
                      :drawdown drawdown
                      :drawdown-prct drawdown-prct
+                     :equity-max equity-max
                      ;; bars
                      :bars (if (and entry-idx exit-idx)
                              (dfn/- exit-idx entry-idx)
