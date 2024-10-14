@@ -16,7 +16,9 @@
                      :pl (fn [ds]
                            (dfn/sum (:pl ds)))
                      :pl-mean (fn [ds]
-                                (dfn/mean (:pl ds)))}
+                                (dfn/mean (:pl ds)))
+                     :pl-median (fn [ds]
+                                  (dfn/median (:pl ds)))}
                     {:drop-missing? false})
       (tc/set-dataset-name (tc/dataset-name roundtrips-ds))))
 
@@ -33,7 +35,7 @@
         row (first vec)]
     row))
 
-(defn win-loss-performance-metrics [win-loss-stats]
+(defn win-loss-performance-metrics [roundtrips-ds win-loss-stats]
   (let [win (get-group-of win-loss-stats :win? true)
         loss (get-group-of win-loss-stats :win? false)
         ;_ (println "win: " win)
@@ -44,15 +46,18 @@
         win {:trades (or (:trades win) 0)
              :bars (or (:bars win) 0)
              :pl (or (:pl win) 0.0)
-             :pl-mean (or (:pl-mean win) 0.0)}
+             :pl-mean (or (:pl-mean win) 0.0)
+             :pl-median (or (:pl-median win) 0.0)}
         loss {:trades (or (:trades loss) 0)
               :bars (or (:bars loss) 0)
               :pl (or  (:pl loss) 0.0)
-              :pl-mean (or (:pl-mean loss) 0.0)}
+              :pl-mean (or (:pl-mean loss) 0.0)
+              :pl-median (or (:pl-median loss) 0.0)}
         all {:trades (+ (:trades win) (:trades loss))
              :bars (+ (:bars win) (:bars loss))
              :pl (+ (:pl win) (:pl loss))
-             :pl-mean nil}
+             :pl-mean (dfn/mean (:pl roundtrips-ds))
+             :pl-median (dfn/median (:pl roundtrips-ds))}
         ; prct
         win-prct  (let [trades-all (:trades all)]
                     (if (= 0 trades-all)
@@ -79,5 +84,5 @@
 (defn calc-roundtrip-metrics [roundtrips-ds]
   ;(println "calc-roundtrip-metrics ..")
   (let [wl-stats (win-loss-stats roundtrips-ds)
-        metrics (win-loss-performance-metrics wl-stats)]
+        metrics (win-loss-performance-metrics roundtrips-ds wl-stats)]
     metrics))
