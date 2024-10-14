@@ -71,7 +71,7 @@
                           (/ bars trades)))
         ;; profit-factor
         pf (let [pl-win (:pl win)
-                 pl-loss (:pl win)]
+                 pl-loss (:pl loss)]
              (cond (= 0.0 pl-loss)
                    10.0 ; if there are no losses, return a high profit-factor
                    :else
