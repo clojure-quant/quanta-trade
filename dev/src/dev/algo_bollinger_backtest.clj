@@ -20,7 +20,7 @@
       (algo/add-algo bollinger-algo)))
 
 (dag/cell-ids bollinger)
-;; => ([:crypto :d] :day [:crypto :m] :min :stats :backtest)
+;; => ([:crypto :d] :day [:crypto :m] :min :stats :backtest :backtest-old)
 
 (dag/start-log-cell bollinger :day)
 

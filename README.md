@@ -10,7 +10,7 @@
 - opens and closes positions based on the entry stream, the position-update-stream 
   and its rule-config.
 
-### trade-statistics
+### quanta.trade.report 
  - input is a list of open and closed positions ("roundtrips")
  - outputs
    - nav time-series (so how did the portfolio value develop over time) 
@@ -21,11 +21,16 @@
 
 ## for developers
 
+### for development
+ start a nrepl-connection to the dev project.
+ in dev folder you will find plenty of namespaces to play with
+
+
 *code linter*  `clj -M:lint`
 
 *code formatter `clj -M:cljfmt-fix`
 
-*unit tests* `./run-tests.sh`
+*unit tests* `clj -M:test`
 
 
 

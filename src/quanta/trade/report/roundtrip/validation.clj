@@ -57,38 +57,51 @@
 
 (comment
 
-  (validate-roundtrip {:asset "QQQ" :side :long
-                       :entry-price 105.0
-                       :exit-price 110.0
-                       :entry-idx 15
-                       :exit-date (t/zoned-date-time)
-                       :entry-date (t/date)})
+  ;; test with a roundtrip that is ok
 
-  (validate-roundtrip {:asset "QQQ" :side :long
-                       :entry-price 105.0
-                       :exit-price 110.0
-                       :entry-idx 15
-                       :exit-date (t/zoned-date-time)
-                       :entry-date (t/instant)})
+  (def rt1 {:asset "QQQ"
+            :side :long
+            :qty 1.0
+            :entry-price 105.0
+            :exit-price 110.0
+            :entry-idx 15
+            :exit-date (t/zoned-date-time)
+            :entry-date (t/date)})
+
+  (validate-roundtrip rt1)
+  ;; => true
+
+  (human-error-roundtrip rt1)
+  ;; => nil
 
   (human-error-roundtrip
    {:asset "QQQ" :side :long
     :entry-price 105.0
     :exit-price 110.0
     :entry-date (t/instant)})
-
-  (human-error-roundtrip
-   {:asset "QQQ" :side :long
-    :entry-price 105.0
-    :exit-price 110.0
-    :entry-date (t/instant)
-    :exit-date 34})
+  ;; => {:qty ["missing required key"], :exit-date ["missing required key"]}
 
   (human-error-roundtrip
    {:asset "QQQ" :side :long
     :entry-price 105.0
     :exit-price 110.0
     :entry-idx "asdf"})
+  ;; => {:qty ["missing required key"],
+  ;;     :entry-date ["missing required key"],
+  ;;     :exit-date ["missing required key"],
+  ;;     :entry-idx ["should be an integer"]}
+
+  (human-error-roundtrip
+   {:asset "QQQ" :side :long :qty 1.0
+    :entry-price 105.0
+    :exit-price 110.0
+    :entry-date (t/instant)
+    :exit-date 3})
+  ;; => {:exit-date ["unknown error" "unknown error" "unknown error" "unknown error"]}
+
+  ;; ticket opened:
+  ;; https://github.com/metosin/malli/issues/1114
+
   ;; => {:entry-idx ["should be an integer"] 
   ;;     :exit-date ["missing required key"] 
   ;;     :entry-date ["missing required key"]}

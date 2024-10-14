@@ -47,7 +47,9 @@
             (wrap-batch position-change-flow)
             action-flow))
 
-(defn backtest [{:keys [asset entry exit] :as opts} bar-ds]
+(defn backtest [{:keys [asset portfolio entry exit] :as opts
+                 :or {portfolio {:fee 0.2 ; per trade in percent
+                                 :equity-initial 10000.0}}} bar-ds]
   ;(println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
   (let [entry-data-flow (from-algo-ds bar-ds)
         commander (create-position-commander) ; a simplified version of a broker-api
@@ -95,7 +97,7 @@
     (m/? (m/race task done
                  acc-rts-task))
     (let [roundtrips (tc/dataset @roundtrips-a)
-          rt-stats (roundtrip-stats roundtrips)]
+          rt-stats (roundtrip-stats portfolio roundtrips)]
       rt-stats)))
 
 

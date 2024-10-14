@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure    {:mvn/version "1.11.3"}
-        metosin/malli {:mvn/version "0.16.0"} ; roundtrip schemas
+        metosin/malli {:mvn/version "0.16.4"} ; roundtrip schemas
         de.otto/nom {:mvn/version "0.3.0"}
         tick/tick {:mvn/version "0.6.2"}
         org.pinkgorilla/timbre {:mvn/version "0.0.7"}
@@ -29,7 +29,9 @@
                "--config" "cljkondo.edn"
                "--fail-level" "error"
                "--lint"
-               "./src"]}
+               "./src"
+               "./dev/src"
+               ]}
   
     :cljfmt
   {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}

@@ -3,8 +3,7 @@
    [clojure.set]
    [tablecloth.api :as tc]
    [tech.v3.dataset :as tds]
-   [tech.v3.datatype.functional :as dfn]
-   [ta.indicator.drawdown :refer [max-drawdown]]))
+   [tech.v3.datatype.functional :as dfn]))
 
 (defn calc-roundtrip-stats [roundtrips-ds group-by]
   (-> roundtrips-ds
@@ -14,16 +13,10 @@
                      :trades (fn [ds]
                                (tc/row-count ds))
                      ; log
-                     :pl-log-cum (fn [ds]
-                                   (dfn/sum (:ret-log ds)))
-
-                     :pl-log-mean (fn [ds]
-                                    (dfn/mean (:ret-log ds)))
-
-                     :pl-log-max-dd (fn [ds]
-                                      (-> ds
-                                          (tc/->array :ret-log)
-                                          max-drawdown))}
+                     :pl (fn [ds]
+                           (dfn/sum (:pl ds)))
+                     :pl-mean (fn [ds]
+                                (dfn/mean (:pl ds)))}
                     {:drop-missing? false})
       (tc/set-dataset-name (tc/dataset-name roundtrips-ds))))
 
@@ -48,42 +41,42 @@
         ; it might be that there are no losses or no wins
         ; so we need to get defaults for nil
         ; trade #
-        trades-win (or (:trades win) 0)
-        trades-loss (or (:trades loss) 0)
-        trade-count-all (+ trades-win trades-loss)
+        win {:trades (or (:trades win) 0)
+             :bars (or (:bars win) 0)
+             :pl (or (:pl win) 0.0)
+             :pl-mean (or (:pl-mean win) 0.0)}
+        loss {:trades (or (:trades loss) 0)
+              :bars (or (:bars loss) 0)
+              :pl (or  (:pl loss) 0.0)
+              :pl-mean (or (:pl-mean loss) 0.0)}
+        all {:trades (+ (:trades win) (:trades loss))
+             :bars (+ (:bars win) (:bars loss))
+             :pl (+ (:pl win) (:pl loss))
+             :pl-mean nil}
         ; prct
-        win-prct  (/ trades-win trade-count-all)
-        loss-prct (- 1.0 win-prct)
-        ; pl-log-cum
-        pl-log-cum-win (or (:pl-log-cum win) 0.0)
-        pl-log-cum-loss (or  (:pl-log-cum loss) 0.0)
-        pl-log-cum (+ pl-log-cum-win pl-log-cum-loss) ; loss is negative, so add
-        ; bars
-        bars-loss (or (:bars loss) 0)
-        bars-win (or (:bars win) 0)
-        ; mean
-        pl-log-mean-win (or (:pl-log-mean win) 0.0)
-        pl-log-mean-loss (or (:pl-log-mean loss) 0.0)]
-    {:trades trade-count-all
-     :pl-log-cum pl-log-cum
-     :pf (when (and win loss) ; profit factor needs both wins and losses.
-           (/  (* win-prct pl-log-mean-win)
-               (* loss-prct (- 0 pl-log-mean-loss))))
-     :avg-log (/ pl-log-cum  (float trade-count-all))
-     :avg-win-log pl-log-mean-win
-     :avg-loss-log pl-log-mean-loss
-     :win-nr-prct (* 100.0 win-prct)
-     :avg-bars-win  (if (> trades-win 0.0)
-                      (* 1.0 (/ bars-win trades-win))
-                      0.0)
-     :avg-bars-loss (if (> trades-loss 0.0)
-                      (* 1.0 (/ bars-loss trades-loss))
-                      0.0)}))
+        win-prct  (let [trades-all (:trades all)]
+                    (if (= 0 trades-all)
+                      0
+                      (* (/ (:trades win) trades-all) 100.0)))
+        loss-prct (- 100.0 win-prct)
+        ; bar-avg
+        calc-avg-bars (fn [{:keys [trades bars]}]
+                        (if (= 0 trades)
+                          0
+                          (/ bars trades)))
+        ;; profit-factor
+        pf (let [pl-win (:pl win)
+                 pl-loss (:pl win)]
+             (cond (= 0.0 pl-loss)
+                   10.0 ; if there are no losses, return a high profit-factor
+                   :else
+                   (/ pl-win pl-loss)))]
+    {:pf pf
+     :win (assoc win :trade-prct win-prct :bar-avg (calc-avg-bars win))
+     :loss (assoc loss :trade-prct loss-prct :bar-avg (calc-avg-bars loss))
+     :all (assoc all :trade-prct 100.0 :bar-avg (calc-avg-bars all))}))
 
 (defn calc-roundtrip-metrics [roundtrips-ds]
-  (assert (:ret-log roundtrips-ds) "to calc metrics :ret-log column needs to be present!")
-  (assert (:bars  roundtrips-ds) "to calc metrics :bars column needs to be present!")
-  (assert (:win?  roundtrips-ds) "to calc metrics :win? column needs to be present!")
   ;(println "calc-roundtrip-metrics ..")
   (let [wl-stats (win-loss-stats roundtrips-ds)
         metrics (win-loss-performance-metrics wl-stats)]

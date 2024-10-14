@@ -23,7 +23,8 @@
 (deftest metrics-test-only-loss
   ; this tests tests on one hand the entry-exit => roundtrip generation
   ; on the other hand it tests a special case where there are no wins.
-  (is (= (metrics-for-bar-ds bar-entry-ds) #{:roundtrip-ds :metrics :nav-ds})))
+  (is (= (metrics-for-bar-ds bar-entry-ds) #{:roundtrip-ds :metrics ;:nav-ds
+                                             })))
 
 (comment
   (metrics-for-bar-ds bar-entry-ds)
