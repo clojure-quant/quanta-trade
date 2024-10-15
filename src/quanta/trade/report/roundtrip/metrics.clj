@@ -12,6 +12,8 @@
                              (dfn/sum (:bars ds)))
                      :trades (fn [ds]
                                (tc/row-count ds))
+                     :trading-volume (fn [ds]
+                                       (dfn/sum (:volume-entry ds)))
                      ; log
                      :pl (fn [ds]
                            (dfn/sum (:pl ds)))
@@ -45,16 +47,19 @@
         ; trade #
         win {:trades (or (:trades win) 0)
              :bars (or (:bars win) 0)
+             :trading-volume (or (:trading-volume win) 0)
              :pl (or (:pl win) 0.0)
              :pl-mean (or (:pl-mean win) 0.0)
              :pl-median (or (:pl-median win) 0.0)}
         loss {:trades (or (:trades loss) 0)
               :bars (or (:bars loss) 0)
+              :trading-volume (or (:trading-volume win) 0)
               :pl (or  (:pl loss) 0.0)
               :pl-mean (or (:pl-mean loss) 0.0)
               :pl-median (or (:pl-median loss) 0.0)}
         all {:trades (+ (:trades win) (:trades loss))
              :bars (+ (:bars win) (:bars loss))
+             :trading-volume (or (:trading-volume win) 0)
              :pl (+ (:pl win) (:pl loss))
              :pl-mean (dfn/mean (:pl roundtrips-ds))
              :pl-median (dfn/median (:pl roundtrips-ds))}
@@ -75,7 +80,7 @@
              (cond (= 0.0 pl-loss)
                    10.0 ; if there are no losses, return a high profit-factor
                    :else
-                   (/ pl-win pl-loss)))]
+                   (* -1.0 (/ pl-win pl-loss))))]
     {:pf pf
      :win (assoc win :trade-prct win-prct :bar-avg (calc-avg-bars win))
      :loss (assoc loss :trade-prct loss-prct :bar-avg (calc-avg-bars loss))

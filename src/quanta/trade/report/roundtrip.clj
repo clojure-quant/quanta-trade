@@ -16,6 +16,7 @@
    :fee-total (dfn/sum fee)
    :max-drawdown (apply dfn/max drawdown)
    :max-drawdown-prct (apply dfn/max drawdown-prct)})
+
 (defn- roundtrip-stats-impl [portfolio roundtrip-ds]
   (let [vr (validate-roundtrips-ds roundtrip-ds)]
     (if (nom/anomaly? vr)
@@ -29,7 +30,8 @@
             ;_ (println "calc grouped nav metrics")
             ;nav-ds (grouped-nav roundtrip-ds)
             ]
-        {:roundtrip-ds roundtrip-ds
+        {:opts portfolio
+         :roundtrip-ds roundtrip-ds
          :metrics {:nav nav-metrics
                    :roundtrip rt-metrics}
          ;:nav-ds nav-ds
