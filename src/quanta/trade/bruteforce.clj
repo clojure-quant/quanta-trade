@@ -146,7 +146,7 @@
           (spit report-filename
                 (pprint-str {:label label
                              :template-id template-id
-                             :calculated (t/instant)
+                             :calculated (str (t/instant))
                              :algo (safe-algo algo)
                              :variations variations
                              :result result}))))
