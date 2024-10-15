@@ -50,11 +50,10 @@
 roundtrip-ds
 
 (def report
-   (roundtrip-stats
-    {:fee 0.05 ; per trade in percent. 
-     :equity-initial 100000.0}
-       roundtrip-ds
-    ))
+  (roundtrip-stats
+   {:fee 0.05 ; per trade in percent. 
+    :equity-initial 100000.0}
+   roundtrip-ds))
 
 (keys report)
 ;; => (:opts :roundtrip-ds :metrics)
@@ -105,7 +104,10 @@ roundtrip-ds
 (ds->transit-json-file
  roundtrip-ds
  "src/dev/demodata/roundtrips-stock-future.transit-json")
-   
+
+(ds->transit-json-file
+ report
+ "src/dev/demodata/report-stock-future.transit-json")
 
 
 
