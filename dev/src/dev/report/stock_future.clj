@@ -4,7 +4,8 @@
    [tick.core :as t]
    [tablecloth.api :as tc]
    [clojure.edn :as edn]
-   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]))
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]
+   [cquant.tmlds :refer [ds->transit-json-file]]))
 
 ;; load a roundtrip dataset from a file
 ;; the file has date as string, so we need to clean before using it.
@@ -12,7 +13,8 @@
 (defn dt [sdt]
   (-> sdt
       t/date
-      (t/at (t/time "00:00:00"))))
+      (t/at (t/time "00:00:00"))
+      (t/instant)))
 
 (defn clean [row]
   (-> row
@@ -41,12 +43,18 @@
 (-> (load-roundtrips)
     print-table)
 
+(def roundtrip-ds
+  (-> (load-roundtrips)
+      (tc/dataset)))
+
+roundtrip-ds
+
 (def report
-  (->> (load-roundtrips)
-       (tc/dataset)
-       (roundtrip-stats
-        {:fee 0.05 ; per trade in percent. 
-         :equity-initial 100000.0})))
+   (roundtrip-stats
+    {:fee 0.05 ; per trade in percent. 
+     :equity-initial 100000.0}
+       roundtrip-ds
+    ))
 
 (keys report)
 ;; => (:opts :roundtrip-ds :metrics)
@@ -94,7 +102,10 @@
 (* 8648247.13744 0.05 0.01 2.0)
 ;; => 8648.247137440001
 
-
+(ds->transit-json-file
+ roundtrip-ds
+ "src/dev/demodata/roundtrips-stock-future.transit-json")
+   
 
 
 
