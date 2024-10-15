@@ -32,7 +32,6 @@
         entry (dtype/clone (dtype/emap entry-one :keyword long-signal short-signal))
         ds-signal (tc/add-columns ds-bollinger {:entry entry
                                                 :atr (ind/atr {:n n} ds-bars)})]
-
     ds-signal))
 
 (defn bollinger-stats [opts ds-d ds-m]
@@ -61,15 +60,17 @@
            :carry-n 2}
    :backtest {:formula [:day]
               :algo b2/backtest
-              :portfolio {:fee 0.2 ; per trade in percent
+              :portfolio {:fee 0.05 ; per trade in percent
                           :equity-initial 10000.0}
-              :entry {:type :fixed-qty :fixed-qty 1.0}
+              :entry {:type :fixed-amount :fixed-amount 100000.0}
               :exit [{:type :trailing-stop-offset :col :atr}
                      {:type :stop-prct :prct 2.0}
                      {:type :profit-prct :prct 1.0}
                      {:type :time :max-bars 10}]}
    :backtest-old  {:formula [:day]
                    :algo b1/backtest
+                   :portfolio {:fee 0.05 ; per trade in percent
+                               :equity-initial 10000.0}
                    :entry  [:fixed-amount 100000]
                    :exit [:loss-percent 2.0
                           :profit-percent 1.0

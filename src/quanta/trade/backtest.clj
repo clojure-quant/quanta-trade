@@ -9,7 +9,10 @@
    using :asset :entry :exit options.
    can be visualised with 
    quanta.viz.plot.trade.core/roundtrip-stats-ui"
-  [{:keys [asset entry exit] :as opts} bar-ds]
+  [{:keys [asset entry exit portfolio]
+    :or {portfolio {:fee 0.5 ; per trade in percent
+                    :equity-initial 100000.0}}
+    :as opts} bar-ds]
   ; we need to get the asset from the bar-ds, because
   ; here we only see the viz-opts. this needs to be improved.
   (assert asset "backtest needs :asset option")
@@ -20,9 +23,8 @@
                      last)
         {:keys [asset]} last-row
         backtest-opts (select-keys opts [:asset :entry :exit])
-        {:keys [roundtrips exit-signal bar-entry-exit-ds] :as full}
-        (entry-signal->roundtrips backtest-opts bar-ds)
-        rt-stats (roundtrip-stats roundtrips)]
+        {:keys [roundtrips exit-signal bar-entry-exit-ds] :as full} (entry-signal->roundtrips backtest-opts bar-ds)
+        rt-stats (roundtrip-stats portfolio roundtrips)]
     rt-stats
     ;full
     ))
