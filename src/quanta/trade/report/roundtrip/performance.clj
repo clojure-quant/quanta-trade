@@ -33,7 +33,7 @@
         ;; percent and log
         _ (println "prct/log")
         pl-points (adjust (dfn/- exit-price entry-price) side)
-        pl-prct (-> 100.0 (dfn/* pl) (dfn// entry-price))
+        pl-prct (-> 100.0 (dfn/* pl) (dfn// entry-volume))
         pl-log (adjust (dfn/- (dfn/log10 exit-price) (dfn/log10 entry-price)) side)
         cum-points  (dfn/cumsum pl-points)
         cum-log  (dfn/cumsum pl-log)

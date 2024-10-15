@@ -109,8 +109,7 @@ roundtrip-ds
  report
  "src/dev/demodata/report-stock-future.transit-json")
 
-
-
+(:roundtrip-ds report)
 
 
 
