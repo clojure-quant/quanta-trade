@@ -1,10 +1,12 @@
 (ns dev.exit.trailing-stop
   (:require
-   [quanta.trade.entry-signal.exit.exit2 :refer [check-exit]]
-   [quanta.trade.entry-signal.exit.exit-config :refer [exit-rule]]))
+   [quanta.trade.entry-signal.exit.position :refer [check-exit]]
+   [quanta.trade.entry-signal.exit.config :refer [exit-rule]]))
 
 (def configured-rule (exit-rule {:type :trailing-stop-offset
                                  :col :atr}))
+
+configured-rule
 
 (def rule (configured-rule
            {:entry-price 10000

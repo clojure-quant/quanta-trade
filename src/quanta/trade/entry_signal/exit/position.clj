@@ -8,14 +8,20 @@
   IExit
   (priority [_]
     2)
-  (check-exit [_ {:keys [high low]}]
+  (check-exit [_ {:keys [open high low]}]
     (case (:side position)
       :long
       (when (>= high level)
-        [label level])
+        (let [exit-price (if (>= open level) ; if triggered on open, close on open
+                           open            ; this is the gap case
+                           level)]
+          [label exit-price]))
       :short
       (when (<= low level)
-        [label level]))))
+        (let [exit-price (if (<= open level)
+                           open
+                           level)]
+          [label exit-price])))))
 
 (defrecord StopLoss [position level label]
   IExit
@@ -25,10 +31,12 @@
     (case (:side position)
       :short
       (when (>= high level)
-        [label level])
+        (let [exit-price (max low level)] ; max is in case for gaps
+          [label exit-price]))
       :long
       (when (<= low level)
-        [label level]))))
+        (let [exit-price (min high level)] ; min is in case for gaps
+          [label exit-price])))))
 
 (defrecord MaxTime [position max-idx label]
   IExit
@@ -36,7 +44,7 @@
     3)
   (check-exit [_ {:keys [idx close]}]
     (when (>= idx max-idx)
-      [label close])))
+      [label close]))) ; time stop is always on close.
 
 (comment
   (def p {:side :long :entry-idx 1})
@@ -81,10 +89,12 @@
               (case (:side position)
                 :short
                 (when (>= high @level-a)
-                  [label @level-a])
+                  (let [exit-price (max low @level-a)] ; max is in case for gaps
+                    [label exit-price]))
                 :long
                 (when (<= low @level-a)
-                  [label @level-a])))
+                  (let [exit-price (min high @level-a)] ; min is in case for gaps
+                    [label exit-price]))))
           ; second calculate new level, and possibly move level
           unchecked-level (new-level-fn position @level-a row)
           ;_ (println "trailing unchecked-level: " unchecked-level)

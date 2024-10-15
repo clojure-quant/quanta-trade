@@ -68,7 +68,3 @@
                                :long (- entry-price offset)
                                :short (+ entry-price offset)))))]
       (TrailingStopLoss. position level-a new-level-fn label))))
-
-
-
-
