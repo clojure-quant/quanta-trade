@@ -1,5 +1,6 @@
 (ns dev.algo-bollinger
   (:require
+   [taoensso.telemere :as tm]
    [tech.v3.datatype :as dtype]
    [tablecloth.api :as tc]
    [ta.indicator :as ind]
@@ -19,13 +20,13 @@
     :else :flat))
 
 (defn bollinger-calc [opts dt]
-  (println "bollinger-calc dt: " dt " opts: " opts)
+  (tm/log! (str "bollinger-calc dt: " dt " opts: " opts))
   (log "bollinger-dt: " dt)
   (log "bollinger-opts: " opts)
   (let [n (or (:atr-n opts) 2)
         k (or (:atr-k opts) 1.0)
         ds-bars (get-trailing-bars opts dt)
-        ;_ (log "trailing-bars: " ds-bars) ; for debugging - logs to the dag logfile
+        _ (tm/log! (str "bollinger ds-bars: " ds-bars)) ; for debugging - logs to the dag logfile
         ds-bollinger (band/add-bollinger {:n n :k k} ds-bars)
         long-signal (cross-up (:close ds-bollinger) (:bollinger-upper ds-bollinger))
         short-signal (cross-up (:close ds-bollinger) (:bollinger-lower ds-bollinger))

@@ -1,6 +1,7 @@
 (ns quanta.trade.backtest2
   (:require
    [missionary.core :as m]
+   [taoensso.telemere :as tm]
    [tablecloth.api :as tc]
    [quanta.trade.commander :as cmd]
    [quanta.trade.entry-signal.core :as rule]
@@ -13,7 +14,7 @@
   (assert rm "algo-action needs :commander env")
   (m/ap
    (let [{:keys [data entry-signal shutdown]} (m/?> entry-data-flow)]
-     (m/? (m/sleep 10))
+     (m/? (m/sleep 1))
          ;; from algo
          ;; first check exits.
      (when data
@@ -50,7 +51,7 @@
 (defn backtest [{:keys [asset portfolio entry exit] :as opts
                  :or {portfolio {:fee 0.2 ; per trade in percent
                                  :equity-initial 10000.0}}} bar-ds]
-  ;(println "backtesting " asset " with bar-ds # " (tc/row-count bar-ds))
+  (tm/log! (str "backtesting " asset " with bar-ds # " (tc/row-count bar-ds)))
   (let [entry-data-flow (from-algo-ds bar-ds)
         commander (create-position-commander) ; a simplified version of a broker-api
         rm (rule/create-entrysignal-manager opts)
@@ -61,13 +62,13 @@
         done (m/mbx)
         roundtrips-a (atom [])
         acc-rts-task (m/reduce (fn [r rt]
-                          ;(println "roundtrip complete: " rt)       
+                                 (println "roundtrip complete: " rt)
                                  (swap! roundtrips-a conj rt))
                                nil
                                (cmd/position-roundtrip-flow commander))
         prior-command-seq (atom [])
         task (m/reduce (fn [r x]
-                         ;(println "x: " x)
+                         (tm/log! x)
                          (let [[command-seq signal-action] x]
                            ;(println "command-seq: " command-seq)
                            (when (not (= @prior-command-seq command-seq))

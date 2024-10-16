@@ -1,6 +1,7 @@
 {:paths ["src"]
  :deps
  {org.clojure/clojure    {:mvn/version "1.11.3"}
+  com.taoensso/telemere {:mvn/version "1.0.0-beta25"}
   io.github.clojure-quant/quanta-market {:mvn/version "0.1.115"} ; to load real data in backtest
   io.github.clojure-quant/quanta-bar-warehouse {:mvn/version "0.1.2"} ; *bar-db* env
   io.github.clojure-quant/techml-dataset-cljs {:mvn/version "0.1.15"} ; tmlds transit encoding

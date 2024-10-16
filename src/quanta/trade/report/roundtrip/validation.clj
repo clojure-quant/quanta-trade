@@ -1,6 +1,8 @@
 (ns quanta.trade.report.roundtrip.validation
   (:require
    [de.otto.nom.core :as nom]
+   [taoensso.telemere :as tm]
+   [tablecloth.api :as tc]
    [tick.core :as t]
    [malli.core :as m]
    [malli.registry :as mr]
@@ -40,6 +42,7 @@
 
 (defn validate-roundtrips [rts]
   ;(assert (seq? rts) "validate-roundtrips operates on a seq only!")
+
   (loop [rt (first rts)
          rts (rest rts)]
     ;(println "validationg rt: " rt)
@@ -49,15 +52,20 @@
         (recur (first rts) (rest rts)))
       (do
         (println "rt validation failed: rt:" rt "error: " (human-error-roundtrip rt))
+        (println "rts: " rts)
         (nom/fail ::roundtrip-validation-errror {:message (human-error-roundtrip rt)})))))
 
 (defn validate-roundtrips-ds [roundtrip-ds]
+  (tm/log! (str "validate-roundtrips-ds: " roundtrip-ds))
+  (assert (not (nil? roundtrip-ds)) "roundtrip-ds cannot be nil.")
   (assert (tds/dataset? roundtrip-ds) "validate-roundtrips-ds needs a tml dataset!")
+  (assert (> (tc/row-count roundtrip-ds) 0) "roundtrip-ds cannot have 0 rows.")
+  (tm/log! "validate-roundtrips-ds: validation success!")
   (validate-roundtrips (tds/mapseq-reader roundtrip-ds)))
 
 (comment
 
-  ;; test with a roundtrip that is ok
+;; test with a roundtrip that is ok
 
   (def rt1 {:asset "QQQ"
             :side :long

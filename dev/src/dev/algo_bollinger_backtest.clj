@@ -28,5 +28,3 @@
 
 (dag/start-log-cell bollinger :backtest)
 
-;; see .data/ for dag logfile.
-
