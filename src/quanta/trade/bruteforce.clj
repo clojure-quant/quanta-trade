@@ -1,15 +1,16 @@
 (ns quanta.trade.bruteforce
   (:require
    [de.otto.nom.core :as nom]
+   [clojure.stacktrace :as stack]
    [tick.core :as t]
-   [taoensso.timbre :refer [info warn error]]
+   [taoensso.telemere :as tm]
    [missionary.core :as m]
    [nano-id.core :refer [nano-id]]
    [babashka.fs :as fs]
    [modular.fipp :refer [pprint-str]]
    [quanta.dag.core :as dag]
    [quanta.algo.core :as algo]
-   [quanta.algo.options :refer [create-algo-variations]]
+   [quanta.algo.options :refer [apply-options create-algo-variations variation-keys]]
    [quanta.trade.backtest.store :refer [ds->nippy nippy->ds ds->transit-json-file]]))
 
 (defn calculate-cell-once
@@ -20,11 +21,6 @@
               (algo/add-env-time-snapshot dt)
               (algo/add-algo algo-spec))]
     (dag/get-current-valid-value d cell-id)))
-
-(defn variation-keys [variations]
-  (->> variations
-       (partition 2)
-       (map first)))
 
 (defn get-variation [template v]
   (cond
@@ -67,21 +63,39 @@
         ds-safe (nippy->ds fname-nippy)]
     (ds->transit-json-file fname-transit ds-safe)))
 
+(defn calculate-cell-once-safe [dag-env algo dt cell-id]
+  (try
+    {:data (calculate-cell-once dag-env algo dt cell-id)}
+    (catch Exception ex
+      {:err  (with-out-str
+               (stack/print-stack-trace ex))})))
+
 (defn create-algo-task [dag-env algo cell-id dt variations target-fn show-fn report-dir]
   ; needs to throw so it can fail.
   (m/via m/cpu
          (let [id (nano-id 6)
-               result (calculate-cell-once dag-env algo dt cell-id)
-               summary (summarize algo variations)
-               target {:target (run-target-fn-safe target-fn result)}
-               show (run-show-fn-safe show-fn result)
-               report (merge summary target show {:id id})]
-           (when report-dir
-             (spit (str report-dir id "-result.edn") (pr-str report))
-             (spit (str report-dir id "-raw.txt") (with-out-str (println result)))
-             (save-ds report-dir id (:roundtrip-ds result))
-             (save-backtest report-dir id result))
-           report)))
+               {:keys [data err]} (calculate-cell-once-safe dag-env algo dt cell-id)]
+           (if data
+             ; happy path
+             (let [summary (summarize algo variations)
+                   target (run-target-fn-safe target-fn data)
+                   show (run-show-fn-safe show-fn data)
+                   report (merge summary
+                                 show
+                                 {:id id
+                                  :target target})]
+               (when report-dir
+                 (spit (str report-dir id "-result.edn") (pr-str report))
+                 (spit (str report-dir id "-raw.txt") (with-out-str (println report)))
+                 (save-ds report-dir id (:roundtrip-ds report))
+                 (save-backtest report-dir id report))
+               report)
+             ; error path
+             (do (when report-dir
+                   (spit (str report-dir id "-error.txt") err))
+                 (merge (summarize algo variations)
+                        {:error err
+                         :id id}))))))
 
 (defn safe-algo-one [x]
   (if (map? x)
@@ -94,8 +108,12 @@
     (->> (map safe-algo-one algo-spec)
          (into []))))
 
+(defn limit-task [sem blocking-task]
+  (m/sp
+   (m/holding sem (m/? blocking-task))))
+
 (defn bruteforce
-  "runs all variations on a template
+  "runs all variations on a algo
    template-id is referring to a template that is added to quanta studio.
    mode is the algo-mode from the template that gets run
    options overrides the default options of the template (wil be done once on startup)
@@ -111,15 +129,17 @@
      ;:k1 [1.0 1.5]
      [:exit 1] [60 90]]
    "
-  [dag-env {:keys [algo cell-id variations dt
+  [dag-env {:keys [algo cell-id options variations dt
                    target-fn show-fn
-                   label
-                   template-id
-                   data-dir]
+                   label label-info
+                   data-dir
+                   parallel-tasks]
             :or {show-fn (fn [result] {})
                  cell-id :backtest
+                 options {}
+                 label-info {}
                  dt (t/instant)
-                 template-id nil
+                 parallel-tasks 10
                  data-dir ".data/bruteforce/"}}]
   ; from: https://github.com/leonoel/missionary/wiki/Rate-limiting#bounded-blocking-execution
   ; When using (via blk ,,,) It's important to remember that the blocking thread pool 
@@ -130,27 +150,32 @@
                        (fs/delete-tree report-dir)
                        (fs/create-dirs report-dir)
                        report-dir))
-        sem (m/sem 10)
+        sem (m/sem parallel-tasks)
+        algo (apply-options algo options)
         algo-seq (create-algo-variations algo variations)
         tasks (map #(create-algo-task dag-env % cell-id dt variations target-fn show-fn report-dir) algo-seq)
-        ;tasks-limited (map #(limit-task sem %) tasks)
-        ]
-    (info "brute force backtesting " (count tasks) " variations ..")
+        tasks-limited (map #(limit-task sem %) tasks)]
+    (tm/log! (str "brute force backtesting " (count tasks) " variations .."))
     (let [result (m/?
-                  (apply m/join vector tasks))
-          result (->> result
-                      (sort-by :target)
-                      (reverse))]
+                  (apply m/join vector tasks-limited))
+          result-ok (remove #(:err %) result)
+          result-bad (filter #(:err %) result)
+          result-ok (->> result-ok
+                         (sort-by :target)
+                         (reverse))]
       (when label
         (let [report-filename (str data-dir label ".edn")]
           (spit report-filename
-                (pprint-str {:label label
-                             :template-id template-id
-                             :calculated (str (t/instant))
-                             :algo (safe-algo algo)
-                             :variations variations
-                             :result result}))))
-      result)))
+                (pprint-str (merge
+                             label-info
+                             {:label label
+                              :calculated (str (t/instant))
+                              :algo (safe-algo algo)
+                              :variations variations
+                              :variation-cols (variation-keys variations)
+                              :result result})))))
+      {:ok result-ok
+       :bad result-bad})))
 
 (defn cut-extension [filename]
   (subs filename 0 (- (count filename) 4)))

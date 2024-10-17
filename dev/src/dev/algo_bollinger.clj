@@ -21,6 +21,11 @@
 
 (defn bollinger-calc [opts dt]
   (tm/log! (str "bollinger-calc dt: " dt " opts: " opts))
+  (when (and (= (:asset opts) "ETHUSDT")
+             (= (:atr-n opts) 50))
+    (log "simulated crash eth-usdt atr-50" :bruteforce-test)
+    (tm/log! "simulated crash ethusdt atr-50")
+    (throw (ex-info "eth-atr-50-ex" {:message "this is used for bruteforce test"})))
   (log "bollinger-dt: " dt)
   (log "bollinger-opts: " opts)
   (let [n (or (:atr-n opts) 2)
