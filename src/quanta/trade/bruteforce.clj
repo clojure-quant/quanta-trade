@@ -86,9 +86,9 @@
                                   :target target})]
                (when report-dir
                  (spit (str report-dir id "-result.edn") (pr-str report))
-                 (spit (str report-dir id "-raw.txt") (with-out-str (println report)))
-                 (save-ds report-dir id (:roundtrip-ds report))
-                 (save-backtest report-dir id report))
+                 (spit (str report-dir id "-raw.txt") (with-out-str (println data)))
+                 (save-ds report-dir id (:roundtrip-ds data))
+                 (save-backtest report-dir id data))
                report)
              ; error path
              (do (when report-dir
