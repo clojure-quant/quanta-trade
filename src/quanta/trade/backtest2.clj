@@ -3,105 +3,35 @@
    [missionary.core :as m]
    [taoensso.telemere :as tm]
    [tablecloth.api :as tc]
+   [tech.v3.dataset :as tds]
    [quanta.trade.commander :as cmd]
-   [quanta.trade.entry-signal.core :as rule]
-   [quanta.trade.backtest.commander :refer [create-position-commander]]
-   [quanta.trade.backtest.from-entry :refer [from-algo-ds]]
+   [quanta.trade.backtest.commander :refer [create-position-commander roundtrips get-trades]]
+   [quanta.trade.entry-signal.trader :as entry-trader]
    [quanta.trade.report.roundtrip :refer [roundtrip-stats]]))
 
-(defn algo-action [{:keys [rm commander]} entry-data-flow]
-  (assert rm "algo-action needs :rm env")
-  (assert rm "algo-action needs :commander env")
-  (m/ap
-   (let [{:keys [data entry-signal shutdown]} (m/?> entry-data-flow)]
-     (m/? (m/sleep 1))
-         ;; from algo
-         ;; first check exits.
-     (when data
-       (let [exits (rule/check-exit rm data)]
-         (when (seq exits)
-                ;(println "sending exits: " exits)  
-           (doall (map #(cmd/close! commander %) exits)))))
-         ;; second check entries.
-     (when (and data entry-signal)
-       (let [position (rule/create-entry rm data)]
-              ;(println "sending entry: " position)
-         (cmd/open! commander position)))
-        ; return data:
-     (if shutdown
-       {:shutdown true}
-       data))))
-
-(defn batch-combiner [r v]
-   ;(println "batch: " r v)
-  (if (vector? r)
-    (conj r v)
-    [r v]))
-
-(defn wrap-batch [f]
-  (->> f
-       (m/relieve batch-combiner)
-       (m/reductions {} [])))
-
-(defn mix-flows [action-flow position-change-flow]
-  (m/sample vector
-            (wrap-batch position-change-flow)
-            action-flow))
-
-(defn backtest [{:keys [asset portfolio entry exit] :as opts
-                 :or {portfolio {:fee 0.2 ; per trade in percent
-                                 :equity-initial 10000.0}}} bar-ds]
-  (tm/log! (str "backtesting " asset " with bar-ds # " (tc/row-count bar-ds)))
-  (let [entry-data-flow (from-algo-ds bar-ds)
+(defn entry->roundtrips [{:keys [asset entry exit] :as opts} bar-ds]
+  (let [n (tc/row-count bar-ds)
+        r (range n)
+        bar-ds-idx (tc/add-column bar-ds :idx r)
         commander (create-position-commander) ; a simplified version of a broker-api
-        rm (rule/create-entrysignal-manager opts)
-        action-flow (algo-action {:rm rm :commander commander} entry-data-flow)
-        position-change-flow (cmd/position-change-flow commander)
-        position-change-flow (m/buffer 100 position-change-flow)
-        mixed-flow (mix-flows action-flow position-change-flow)
-        done (m/mbx)
-        roundtrips-a (atom [])
-        acc-rts-task (m/reduce (fn [r rt]
-                                 (println "roundtrip complete: " rt)
-                                 (swap! roundtrips-a conj rt))
-                               nil
-                               (cmd/position-roundtrip-flow commander))
-        prior-command-seq (atom [])
-        task (m/reduce (fn [r x]
-                         (tm/log! x)
-                         (let [[command-seq signal-action] x]
-                           ;(println "command-seq: " command-seq)
-                           (when (not (= @prior-command-seq command-seq))
-                             (reset! prior-command-seq command-seq)
-                             (let [command-seq (if (vector? command-seq)
-                                                 command-seq
-                                                 [command-seq])]
-                               ;(println "command-seq2: " command-seq)
-                               (doall (map (fn [{:keys [open close shutdown] :as cmd-update}]
-                                           ;(println "cmd-update: " cmd-update)
-                                             (when open
-                                           ; {:side :long, :asset EUR/USD, :qty 1.0, :entry-idx 3, :entry-date nil, :entry-price 80, :id EOG7TD}
-                                               (rule/on-position-open rm open))
-                                             (when close
-                                               (rule/on-position-close rm close)))
-                                           command-seq))))
-                            ;; from commander
-                            ;(println "signal-action: " signal-action)
-                           (when (:shutdown signal-action)
-                               ;(println "algo-backtest has shutdown!")
-                             (done :shutdown)
-                               ;  (cmd/shutdown! commander)
-                             )))
-                       nil mixed-flow)]
+        algo-trader (entry-trader/create-entry-trader commander opts)]
+    (tm/log! (str "backtesting " asset " with bar-ds # " n))
 
-    ;(m/? task)
-    (m/? (m/race task done
-                 acc-rts-task))
-    (let [roundtrips (tc/dataset @roundtrips-a)
-          rt-stats (roundtrip-stats portfolio roundtrips)]
-      rt-stats)))
+    (doall
+     (map (fn [row]
+             ;(tm/log! (str "row " row))
+            (entry-trader/process-algo-action! algo-trader row)
+            (let [trades (get-trades commander)]
+              (doall
+               (map #(entry-trader/process-position-update! algo-trader %) trades))))
+          (tds/mapseq-reader bar-ds-idx)))
+    (roundtrips commander)))
 
-
+(defn backtest [{:keys [asset portfolio entry exit] :as opts} bar-ds]
+  (let [roundtrips (entry->roundtrips opts bar-ds)
+        roundtrip-ds (tc/dataset roundtrips)
+        rt-stats (roundtrip-stats portfolio roundtrip-ds)]
+    rt-stats))
 
 
 

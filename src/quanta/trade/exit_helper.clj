@@ -1,7 +1,7 @@
 (ns quanta.trade.exit-helper
   (:require
    [tick.core :as t]
-   [quanta.trade.entry-signal.core :as rule]))
+   [quanta.trade.entry-signal.rule :as rule]))
 
 (defn long-exits
   "creates an entrysignal manager 

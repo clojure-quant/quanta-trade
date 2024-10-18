@@ -1,4 +1,4 @@
-(ns quanta.trade.entry-signal.core
+(ns quanta.trade.entry-signal.rule
   (:require
    [quanta.trade.entry-signal.entry.core :as entry]
    [quanta.trade.entry-signal.exit.config :refer [exit-rule]]
