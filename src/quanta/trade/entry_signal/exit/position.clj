@@ -2,7 +2,8 @@
 
 (defprotocol IExit
   (priority [_])
-  (check-exit [_ bar]))
+  (check-exit [_ bar])
+  (get-level [_]))
 
 (defrecord TakeProfit [position level label]
   IExit
@@ -21,7 +22,9 @@
         (let [exit-price (if (<= open level)
                            open
                            level)]
-          [label exit-price])))))
+          [label exit-price]))))
+  (get-level [_]
+    level))
 
 (defrecord StopLoss [position level label]
   IExit
@@ -36,7 +39,9 @@
       :long
       (when (<= low level)
         (let [exit-price (min high level)] ; min is in case for gaps
-          [label exit-price])))))
+          [label exit-price]))))
+  (get-level [_]
+    level))
 
 (defrecord MaxTime [position max-idx label]
   IExit
@@ -44,7 +49,9 @@
     3)
   (check-exit [_ {:keys [idx close]}]
     (when (>= idx max-idx)
-      [label close]))) ; time stop is always on close.
+      [label close])) ; time stop is always on close.
+  (get-level [_]
+    nil))
 
 (comment
   (def p {:side :long :entry-idx 1})
@@ -67,6 +74,8 @@
   )
 (defrecord TrailingTakeProfit [position level adjust-level-fn label]
   IExit
+  (priority [_]
+    2)
   (check-exit [_ {:keys [high low] :as row}]
     (let [r (case (:side position)
               :long
@@ -79,10 +88,14 @@
       (when new-level
         ;(println "TrailingTakeProfit changes to: " level)
         (reset! level new-level))
-      r)))
+      r))
+  (get-level [_]
+    @level))
 
 (defrecord TrailingStopLoss [position level-a new-level-fn label]
   IExit
+  (priority [_]
+    1)
   (check-exit [_ {:keys [high low] :as row}]
     (let [; first check if there is an exit at current level
           r (when (not (nil? @level-a))
@@ -114,13 +127,23 @@
         ;(println "TrailingStopLoss unchanged level: " @level-a 
         ;         " side: " (:side position) " unchecked level: " unchecked-level)
         ;)
-      r)))
+      r))
+  (get-level [_]
+    @level-a))
 
-(defrecord MultipleRules [rules]
+(defrecord MultipleRules [position rules]
   IExit
   (check-exit [_ {:keys [high low] :as row}]
     (->> rules
          (map #(check-exit % row))
          (remove nil?)
-         first)))
+         first))
+  (get-level [_]
+    (let [rules-loss (filter #(= 1 (priority %)) rules)
+          rules-profit (filter #(= 2 (priority %)) rules)
+          level-loss (map #(get-level %) rules-loss)
+          level-profit (map #(get-level %) rules-profit)]
+      {:side (:side position)
+       :profit level-profit
+       :loss level-loss})))
 

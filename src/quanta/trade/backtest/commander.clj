@@ -1,5 +1,6 @@
 (ns quanta.trade.backtest.commander
   (:require
+   [taoensso.telemere :as tm]
    [nano-id.core :refer [nano-id]]
    [quanta.trade.commander :as p]))
 
@@ -7,6 +8,7 @@
   (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx])]
     (swap! position-a assoc (:id p) p)
     (swap! trade-a conj {:open p})
+    (tm/log! (str "positon open: " p))
     {:open p}))
 
 (defn close-position! [position-a trade-a roundtrip-a exit-p]
@@ -17,6 +19,8 @@
     (swap! roundtrip-a conj pos)
     (swap! position-a dissoc id)
     (swap! trade-a conj {:close pos})
+    (tm/log! (str "positon close: " pos))
+    (tm/log! (str "rts: " (count @roundtrip-a)))
     {:close pos}))
 
 (defprotocol backtest-commander

@@ -10,12 +10,11 @@
     ;; first check exits.
     (let [exits (rule/check-exit rm algo-row)]
       (when (seq exits)
-          ;(tm/log! (str "exits " exits))
-          ;(println "sending exits: " exits)  
+        (tm/log! (str "exits " exits))
         (doall (map #(c/close! commander %) exits))))
     ;; second check entries.
     (when (and entry (or (= :long entry) (= :short entry)))
-      ;(tm/log! (str "entry " entry))
+      (tm/log! (str "entry " entry))
       (let [position (rule/create-entry rm algo-row)]
         (c/open! commander position)))
     nil))

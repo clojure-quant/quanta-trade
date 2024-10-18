@@ -1,5 +1,6 @@
 (ns quanta.trade.entry-signal.rule
   (:require
+   [taoensso.telemere :as tm]
    [quanta.trade.entry-signal.entry.core :as entry]
    [quanta.trade.entry-signal.exit.config :refer [exit-rule]]
    [quanta.trade.entry-signal.exit.position :as exit])
@@ -27,7 +28,7 @@
   ;(println "creating exit-rules for position: " position)
   ;(println "exit rules:  " rules)
   (let [position-rules (map #(% position) rules)]
-    (MultipleRules. position-rules)))
+    (MultipleRules. position position-rules)))
 
 (defn on-position-open
   "on-position-open is an event that gets emitted by trade-commander.
@@ -69,6 +70,17 @@
   (->> (vals @positions)
        (map #(check-exit-position % row))
        (remove nil?)))
+
+(defn get-level [{:keys [position manager]}]
+  (exit/get-level manager))
+
+(defn get-levels [{:keys [positions]}]
+  (let [levels (->> (vals @positions)
+                    (map #(get-level %))
+                    ;(remove nil?)
+                    (into []))]
+    (tm/log! (str "levels " levels))
+    levels))
 
 
 
