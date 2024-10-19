@@ -33,7 +33,7 @@
                :atr [5.0 5.0 5.0 5.0
                      5.0 5.0 5.0
                      5.0 5.0 5.0 5.0 5.0]
-               :entry [:flat :long nil nil
+               :entry [:long :long nil nil
                        :long :flat :flat
                        :short nil nil nil]}))
 

@@ -4,12 +4,17 @@
    [nano-id.core :refer [nano-id]]
    [quanta.trade.commander :as p]))
 
+(defn has-position-in [position-a p]
+  (let [asset (:asset p)]
+    (some #(= asset (:asset %)) (vals @position-a))))
+
 (defn open-position! [position-a trade-a p]
-  (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx])]
-    (swap! position-a assoc (:id p) p)
-    (swap! trade-a conj {:open p})
+  (when (not (has-position-in position-a p))
+    (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx])]
+      (swap! position-a assoc (:id p) p)
+      (swap! trade-a conj {:open p})
     ;(tm/log! (str "positon open: " p))
-    {:open p}))
+      {:open p})))
 
 (defn close-position! [position-a trade-a roundtrip-a exit-p]
   (let [id (:id exit-p)
