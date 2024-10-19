@@ -31,8 +31,8 @@
 
 (defn extract [rt]
   (when rt
-    (let [{:keys [reason exit-price]} rt]
-      [reason exit-price])))
+    (let [{:keys [exit-reason exit-price]} rt]
+      [exit-reason exit-price])))
 
 (defn convert-to-vectors [data]
   (let [cols (keys data)]

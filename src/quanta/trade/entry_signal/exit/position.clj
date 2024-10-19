@@ -121,12 +121,13 @@
                                 (> unchecked-level @level-a))
                         unchecked-level))]
       (when new-level
-        ;(println "TrailingStopLoss changes from " @level-a " to: " new-level)
+        (println "trailing-stop changes from " @level-a " to: " new-level)
         (reset! level-a new-level))
       ;(when (not new-level)
         ;(println "TrailingStopLoss unchanged level: " @level-a 
         ;         " side: " (:side position) " unchecked level: " unchecked-level)
         ;)
+      (println "trailing-stop exit: " r)
       r))
   (get-level [_]
     @level-a))

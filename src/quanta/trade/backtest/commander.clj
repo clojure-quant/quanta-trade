@@ -10,7 +10,7 @@
 
 (defn open-position! [position-a trade-a p]
   (when (not (has-position-in position-a p))
-    (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx])]
+    (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx :entry-row])]
       (swap! position-a assoc (:id p) p)
       (swap! trade-a conj {:open p})
     ;(tm/log! (str "positon open: " p))
@@ -18,9 +18,10 @@
 
 (defn close-position! [position-a trade-a roundtrip-a exit-p]
   (let [id (:id exit-p)
-        exit-p (select-keys exit-p [:exit-date :exit-idx :exit-price :reason])
-        pos (get @position-a id)
-        pos (merge pos exit-p)]
+        exit-p (select-keys exit-p [:exit-date :exit-idx :exit-price :exit-reason])
+        pos (-> (get @position-a id)
+                (dissoc :entry-row)
+                (merge exit-p))]
     (swap! roundtrip-a conj pos)
     (swap! position-a dissoc id)
     (swap! trade-a conj {:close pos})

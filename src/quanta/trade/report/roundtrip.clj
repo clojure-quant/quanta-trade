@@ -54,6 +54,7 @@
                      :equity-initial 10000.0}
                     roundtrip-ds))
   ([portfolio roundtrip-ds]
+   (assert portfolio "roundtrip stats needs portfolio parameter!")
    (assert (tds/dataset? roundtrip-ds) "roundtrip stats needs a tml dataset!")
    (try
      (roundtrip-stats-impl portfolio roundtrip-ds)

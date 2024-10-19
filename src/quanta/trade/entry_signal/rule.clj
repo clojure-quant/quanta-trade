@@ -2,7 +2,7 @@
   (:require
    [taoensso.telemere :as tm]
    [quanta.trade.entry-signal.entry.core :as entry]
-   [quanta.trade.entry-signal.exit.config :refer [exit-rule]]
+   [quanta.trade.entry-signal.exit.config :refer [setup-exit-rules]]
    [quanta.trade.entry-signal.exit.position :as exit])
   (:import
    [quanta.trade.entry_signal.exit.position MultipleRules]))
@@ -11,7 +11,7 @@
   {:positions (atom {})
    :asset asset
    :entrysize-fn (entry/positionsize2 entry)
-   :exit-rules (map exit-rule exit)})
+   :exit-rules (setup-exit-rules exit)})
 
 ;; entry
 
@@ -50,7 +50,7 @@
   ;; {:id 5, :asset EUR/USD, :side :long, 
   ;;         :entry-price 1.1, :qty 100000}
   (when-let [exit (exit/check-exit manager row)] ; [:profit-prct 1.1110000000000002]
-    (let [[reason exit-price] exit
+    (let [[exit-reason exit-price] exit
           {:keys [id asset side entry-price entry-date qty]} position
           {:keys [idx date]} row]
       {:id id
@@ -60,7 +60,7 @@
        :entry-price entry-price
        :entry-date entry-date
      ; exit
-       :reason reason
+       :exit-reason exit-reason
        :exit-idx idx
        :exit-price exit-price
        :exit-date date})))

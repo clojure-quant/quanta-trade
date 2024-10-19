@@ -24,4 +24,6 @@
    :qty (entrysize-fn close)
    :entry-idx idx
    :entry-date date
-   :entry-price close})
+   :entry-price close
+   :entry-row row ; this is important for dynamic exit rule creation.
+   })
