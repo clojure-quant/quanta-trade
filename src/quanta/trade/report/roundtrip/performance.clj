@@ -16,7 +16,7 @@
   (let [roundtrip-ds (tc/order-by roundtrip-ds [:exit-date] [:asc])
         {:keys [side qty entry-price exit-price exit-idx entry-idx]} roundtrip-ds
         ;; pl/equity
-        _ (println "pl/equity")
+        ; _ (println "pl/equity")
         entry-volume (dfn/* qty entry-price)
         exit-volume (dfn/* qty exit-price)
         trading-volume (dfn/+ exit-volume entry-volume)
@@ -31,7 +31,7 @@
         drawdown (drawdowns-from-value equity)
         drawdown-prct (dfn/* (dfn// drawdown equity-max) 100.0)
         ;; percent and log
-        _ (println "prct/log")
+        ;_ (println "prct/log")
         pl-points (adjust (dfn/- exit-price entry-price) side)
         pl-prct (-> 100.0 (dfn/* pl) (dfn// entry-volume))
         pl-log (adjust (dfn/- (dfn/log10 exit-price) (dfn/log10 entry-price)) side)
