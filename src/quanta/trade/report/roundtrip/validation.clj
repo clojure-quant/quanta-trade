@@ -56,11 +56,11 @@
         (nom/fail ::roundtrip-validation-errror {:message (human-error-roundtrip rt)})))))
 
 (defn validate-roundtrips-ds [roundtrip-ds]
-  (tm/log! (str "validate-roundtrips-ds: " roundtrip-ds))
+  ;(tm/log! (str "validate-roundtrips-ds: " roundtrip-ds))
   (assert (not (nil? roundtrip-ds)) "roundtrip-ds cannot be nil.")
   (assert (tds/dataset? roundtrip-ds) "validate-roundtrips-ds needs a tml dataset!")
   (assert (> (tc/row-count roundtrip-ds) 0) "roundtrip-ds cannot have 0 rows.")
-  (tm/log! "validate-roundtrips-ds: validation success!")
+  ;(tm/log! "validate-roundtrips-ds: validation success!")
   (validate-roundtrips (tds/mapseq-reader roundtrip-ds)))
 
 (comment
