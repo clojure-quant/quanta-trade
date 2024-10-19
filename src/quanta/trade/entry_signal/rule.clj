@@ -79,7 +79,7 @@
                     (map #(get-level %))
                     ;(remove nil?)
                     (into []))]
-    (tm/log! (str "levels " levels))
+    ;(tm/log! (str "levels " levels))
     levels))
 
 

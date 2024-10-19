@@ -47,7 +47,7 @@
         algo-trader (entry-trader/create-entry-trader commander opts)
         rule-m (:rm algo-trader)
         levels (doall (map (fn [row]
-                             (tm/log! (str "row " row))
+                             ;(tm/log! (str "row " row))
                              (entry-trader/process-algo-action! algo-trader row)
                              (let [trades (get-trades commander)]
                                (doall
@@ -56,8 +56,8 @@
                            (tds/mapseq-reader bar-ds-idx)))
         rts (roundtrips commander)]
     ; 
-    (tm/log! (str "roundtrips: " rts))
-    (tm/log! (str "levels: " levels))
+    ;(tm/log! (str "roundtrips: " rts))
+    ;(tm/log! (str "levels: " levels))
     {:level-ds (tc/add-columns bar-ds {:target-profit (map profit-level levels)
                                        :target-loss (map loss-level levels)})
      :roundtrips rts}))
