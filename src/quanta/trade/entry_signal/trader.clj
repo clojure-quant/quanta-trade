@@ -26,6 +26,9 @@
   (when close
     (rule/on-position-close rm close)))
 
+(defn get-levels [{:keys [rm] :as _state}]
+  (rule/get-levels rm))
+
 ; setup
 
 #_(defn create-algo-action-f [{:keys [rm commander] :as state} algo-row-f]

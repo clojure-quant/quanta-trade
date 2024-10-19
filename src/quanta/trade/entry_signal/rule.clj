@@ -71,16 +71,16 @@
        (map #(check-exit-position % row))
        (remove nil?)))
 
-(defn get-level [{:keys [position manager]}]
+(defn get-level-position [{:keys [position manager]}]
   (exit/get-level manager))
 
 (defn get-levels [{:keys [positions]}]
-  (let [levels (->> (vals @positions)
-                    (map #(get-level %))
-                    ;(remove nil?)
-                    (into []))]
-    ;(tm/log! (str "levels " levels))
-    levels))
+  (->> (vals @positions)
+       (map #(get-level-position %))
+       (remove nil?)
+       (into [])))
+
+
 
 
 

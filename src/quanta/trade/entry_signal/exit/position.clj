@@ -121,15 +121,16 @@
                                 (> unchecked-level @level-a))
                         unchecked-level))]
       (when new-level
-        (println "trailing-stop changes from " @level-a " to: " new-level)
+        ;(println "trailing-stop changes from " @level-a " to: " new-level)
         (reset! level-a new-level))
       ;(when (not new-level)
         ;(println "TrailingStopLoss unchanged level: " @level-a 
         ;         " side: " (:side position) " unchecked level: " unchecked-level)
         ;)
-      (println "trailing-stop exit: " r)
+      ;(println "trailing-stop exit: " r)
       r))
   (get-level [_]
+      ;(println "trail-stop get-level: " @level-a) 
     @level-a))
 
 (defrecord MultipleRules [position rules]
@@ -142,9 +143,15 @@
   (get-level [_]
     (let [rules-loss (filter #(= 1 (priority %)) rules)
           rules-profit (filter #(= 2 (priority %)) rules)
-          level-loss (map #(get-level %) rules-loss)
-          level-profit (map #(get-level %) rules-profit)]
-      {:side (:side position)
-       :profit level-profit
-       :loss level-loss})))
+          level-loss (->> (map #(get-level %) rules-loss)
+                          (into []))
+
+          level-profit  (->> (map #(get-level %) rules-profit)
+                             (into []))
+          result {:side (:side position)
+                  :profit level-profit
+                  :loss level-loss}]
+       ;(println "multiple-rules get-level: " result)  
+      result)))
+
 

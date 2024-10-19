@@ -58,7 +58,7 @@
           level-initial (case side
                           :long (- entry-price offset)
                           :short (+ entry-price offset))
-          _ (println "trailing-stop initial: side: " side " entry-price: " entry-price "offet: " offset " level: " level-initial)
+          ; _ (println "trailing-stop initial: side: " side " entry-price: " entry-price "offet: " offset " level: " level-initial)
           level-a (atom level-initial)
           new-level-fn (fn [position level row]
                          (let [{:keys [side]} position
@@ -67,7 +67,7 @@
                                level-new (case side
                                            :long (- close offset)
                                            :short (+ close offset))]
-                           (println "trailing-stop side:"  side " offset: " offset " close: " close " level: " level-new)
+                           ; (println "trailing-stop side:"  side " offset: " offset " close: " close " level: " level-new)
                            level-new))]
       (TrailingStopLoss. position level-a new-level-fn label))))
 

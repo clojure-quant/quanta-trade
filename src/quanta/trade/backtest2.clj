@@ -7,26 +7,23 @@
    [quanta.trade.commander :as cmd]
    [quanta.trade.backtest.commander :refer [create-position-commander roundtrips get-trades]]
    [quanta.trade.entry-signal.trader :as entry-trader]
-   [quanta.trade.entry-signal.rule :refer [get-levels]]
    [quanta.trade.report.roundtrip :refer [roundtrip-stats]]))
 
-(defn profit-level [positions]
-  (when-let [p (first positions)]
-    (let [{:keys [side profit]} p]
-      (when (seq profit)
-        (case side
-          :long (apply min profit)
-          :short (apply max profit)
-          nil)))))
+(defn profit-level [{:keys [profit side] :as level}]
+  (when (seq profit)
+    ;(println "profit-level: " level)
+    (case side
+      :long (apply min profit)
+      :short (apply max profit)
+      nil)))
 
-(defn loss-level [positions]
-  (when-let [p (first positions)]
-    (let [{:keys [side loss]} p]
-      (when (seq loss)
-        (case side
-          :long (apply max loss)
-          :short (apply min loss)
-          nil)))))
+(defn loss-level [{:keys [loss side] :as level}]
+  (when (seq loss)
+    ;(println "loss-level: " level)
+    (case side
+      :long (apply max loss)
+      :short (apply min loss)
+      nil)))
 
 (comment
   (profit-level
@@ -45,14 +42,18 @@
         bar-ds-idx (tc/add-column bar-ds :idx r)
         commander (create-position-commander) ; a simplified version of a broker-api
         algo-trader (entry-trader/create-entry-trader commander opts)
-        rule-m (:rm algo-trader)
         levels (doall (map (fn [row]
                              ;(tm/log! (str "row " row))
+                             ; 1. process algo actions
                              (entry-trader/process-algo-action! algo-trader row)
+                             ; 2. process trade-updates from commander
                              (let [trades (get-trades commander)]
                                (doall
                                 (map #(entry-trader/process-position-update! algo-trader %) trades)))
-                             (get-levels rule-m))
+                               ;(tm/log! (str "levels " levels))
+                             ; 3. get stop/target levels
+                             (let [levels (entry-trader/get-levels algo-trader)]
+                               (first levels)))
                            (tds/mapseq-reader bar-ds-idx)))
         rts (roundtrips commander)]
     ; 
