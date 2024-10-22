@@ -2,10 +2,8 @@
   (:require
    [taoensso.telemere :as tm]
    [quanta.trade.entry-signal.entry.core :as entry]
-   [quanta.trade.entry-signal.exit.config :refer [setup-exit-rules]]
-   [quanta.trade.entry-signal.exit.position :as exit])
-  (:import
-   [quanta.trade.entry_signal.exit.position.multiple MultipleRules]))
+   [quanta.trade.entry-signal.exit.config.multiple :refer [setup-exit-rules create-exit-manager-for-position]]
+   [quanta.trade.entry-signal.exit.position :as exit]))
 
 (defn create-entrysignal-manager [{:keys [asset entry exit]}]
   {:positions (atom {})
@@ -20,15 +18,6 @@
   (entry/create-position this data))
 
 ; on position open/close
-
-(defn create-exit-manager-for-position
-  "create a exit-fn for one position. 
-   this gets run on each bar, while the positon is open"
-  [rules position]
-  ;(println "creating exit-rules for position: " position)
-  ;(println "exit rules:  " rules)
-  (let [position-rules (map #(% position) rules)]
-    (MultipleRules. position position-rules)))
 
 (defn on-position-open
   "on-position-open is an event that gets emitted by trade-commander.

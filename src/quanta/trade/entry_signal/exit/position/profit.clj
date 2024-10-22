@@ -33,22 +33,27 @@
 
 ;
   )
-(defrecord TrailingTakeProfit [position level adjust-level-fn label]
+(defrecord TrailingTakeProfit [position levels-a adjust-level-fn label]
   IExit
   (priority [_]
     2)
   (check-exit [_ {:keys [high low] :as row}]
     (let [r (case (:side position)
               :long
-              (when (>= high @level)
-                [label level])
+              (when-let [level (:long @levels-a)]
+                (when (>= high level)
+                  [label level]))
               :short
-              (when (<= low @level)
-                [label level]))
-          new-level (adjust-level-fn position level row)]
+              (when-let [level (:short @levels-a)]
+                (when (<= low level)
+                  [label level])))
+          new-level (adjust-level-fn position levels-a row)]
       (when new-level
         ;(println "TrailingTakeProfit changes to: " level)
-        (reset! level new-level))
+        (reset! levels-a new-level))
       r))
   (get-level [_]
-    @level))
+    (case (:side position)
+      :long (:long @levels-a)
+      :short (:short @levels-a)
+      nil)))
