@@ -23,7 +23,7 @@
   (assert col-long "trailing-profit-target needs :col-long parameter")
   (assert col-short "trailing-profit-target needs :col-short parameter")
   (fn [position]
-    (println "trailing-profit-level created for : " position)
+    ;(println "trailing-profit-level created for : " position)
     (let [{:keys [side entry-row]} position
           level-initial (case side
                           :long  (get entry-row col-long)
