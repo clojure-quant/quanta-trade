@@ -57,7 +57,7 @@
              :date @exit-date
              :idx @exit-idx}
         row (merge bar row)]
-    (println "check-exit bar: " row)
+    ;(println "check-exit bar: " row)
     (-> (rule/check-exit m row)
         first
         extract)))

@@ -1,12 +1,15 @@
 (ns quanta.trade.entry-signal.exit.config
   (:require
-   [quanta.trade.entry-signal.exit.position :as e])
+   [quanta.trade.entry-signal.exit.position :as e]
+   [quanta.trade.entry_signal.exit.position.profit]
+   [quanta.trade.entry_signal.exit.position.loss]
+   [quanta.trade.entry_signal.exit.position.time]
+   [quanta.trade.entry_signal.exit.position.multiple])
   (:import
-   [quanta.trade.entry_signal.exit.position
-    TakeProfit
-    StopLoss TrailingStopLoss
-    MaxTime
-    MultipleRules]))
+   [quanta.trade.entry_signal.exit.position.profit TakeProfit]
+   [quanta.trade.entry_signal.exit.position.loss StopLoss TrailingStopLoss]
+   [quanta.trade.entry_signal.exit.position.time MaxTime]
+   [quanta.trade.entry_signal.exit.position.multiple MultipleRules]))
 
 (defmulti exit-rule
   (fn [{:keys [type] :as opts}]

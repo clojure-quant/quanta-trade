@@ -5,7 +5,7 @@
    [quanta.trade.entry-signal.exit.config :refer [setup-exit-rules]]
    [quanta.trade.entry-signal.exit.position :as exit])
   (:import
-   [quanta.trade.entry_signal.exit.position MultipleRules]))
+   [quanta.trade.entry_signal.exit.position.multiple MultipleRules]))
 
 (defn create-entrysignal-manager [{:keys [asset entry exit]}]
   {:positions (atom {})

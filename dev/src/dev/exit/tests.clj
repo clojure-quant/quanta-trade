@@ -12,6 +12,8 @@
            :close 0.0}
   :exit  [{:type :profit-prct :prct 1.0}]
   :price  [100.0 80.0 100.9 100.9 101.9 80.5]})
+;; => [nil nil [:profit-prct 101.0] [:profit-prct 101.0] [:profit-prct 101.80000000000001] nil]
+
 ;; => [nil nil [:profit-prct 101.0] [:profit-prct 101.0] [:profit-prct 101.0] nil]
 ; 100.9 + 0.2 = 101.1
 
@@ -25,6 +27,8 @@
            :close 0.0}
   :exit  [{:type :profit-prct :prct 1.0}]
   :price  [100.0 80.0 120.9 100.9 101.9 80.5]})
+;; => [nil nil [:profit-prct 120.80000000000001] [:profit-prct 101.0] [:profit-prct 101.80000000000001] nil]
+
 ;; => [nil nil [:profit-prct 120.80000000000001] [:profit-prct 101.0] [:profit-prct 101.80000000000001] nil]
 ; 120.9 - 0.1 = 120.8 closes at open
 ; 100.9 - 0.1 = 100.8 (below limit) high: 100.9+0.2 = 101.1 closes at limit
