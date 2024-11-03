@@ -20,7 +20,7 @@
   (let [d (-> (dag/create-dag dag-env)
               (algo/add-env-time-snapshot dt)
               (algo/add-algo algo-spec))]
-    (dag/get-current-valid-value d cell-id)))
+    (dag/get-current-value d cell-id)))
 
 (defn get-variation [template v]
   (cond

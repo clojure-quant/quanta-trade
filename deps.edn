@@ -8,7 +8,7 @@
         babashka/fs {:mvn/version "0.5.22"} ; create log dir
         org.pinkgorilla/modular {:mvn/version "0.2.59"} ; fipp pretty printing
         io.github.clojure-quant/quanta {:mvn/version "0.4.885"}
-        io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.1.14"}}
+        io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.22"}}
 
  :aliases
  {:test {:extra-paths ["test"]
