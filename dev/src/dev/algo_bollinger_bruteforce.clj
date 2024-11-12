@@ -3,17 +3,17 @@
    [tick.core :as t]
    [clojure.pprint :refer [print-table]]
    [quanta.dag.core :as dag]
-   [quanta.algo.env.bars]
    [quanta.algo.core :as algo]
    [quanta.algo.options :refer [make-variations create-algo-variations variation-keys]]
    [quanta.trade.bruteforce :refer [bruteforce] :as bf]
-   [ta.import.provider.bybit.ds :as bybit]
+   [quanta.market.barimport.bybit.import :as bybit]
    [dev.algo-bollinger :refer [bollinger-algo]]))
 
 ;; ENV
 
 (def bar-db (bybit/create-import-bybit))
-(def env {#'quanta.algo.env.bars/*bar-db* bar-db})
+
+(def env {:bar-db bar-db})
 
 (def dag-env
   {:log-dir ".data/"
@@ -22,8 +22,8 @@
 (def dt (t/instant))
 
 (def variations
-  {[0 :asset] ["BTCUSDT" "ETHUSDT"]
-   [2 :atr-n] [20 50]})
+  {[:* :asset] ["BTCUSDT" "ETHUSDT"]
+   [:algo :atr-n] [20 50]})
 
 (variation-keys variations)
 ;; => ([0 :asset] [2 :day :atr-n])
@@ -55,12 +55,13 @@
 (-> (bruteforce dag-env
                 {:algo bollinger-algo
                  :cell-id :backtest
-                 :options {[2 :trailing-n] 500}
+                 :options {[:bars :trailing-n] 500}
                  :variations variations
                  :target-fn get-pf
                  :show-fn show-fn
                  :dt dt
                  :label "brute1"})
+
     :ok
     print-table)
 

@@ -97,16 +97,12 @@
                         {:error err
                          :id id}))))))
 
-(defn safe-algo-one [x]
-  (if (map? x)
-    (dissoc x :algo)
-    x))
+(defn safe-algo-one [[k v]]
+  [k (dissoc v :fn)])
 
 (defn safe-algo [algo-spec]
-  (if (map? algo-spec)
-    (dissoc algo-spec :algo)
-    (->> (map safe-algo-one algo-spec)
-         (into []))))
+  (->> (map safe-algo-one algo-spec)
+       (into {})))
 
 (defn limit-task [sem blocking-task]
   (m/sp
@@ -158,8 +154,8 @@
     (tm/log! (str "brute force backtesting " (count tasks) " variations .."))
     (let [result (m/?
                   (apply m/join vector tasks-limited))
-          result-ok (remove #(:err %) result)
-          result-bad (filter #(:err %) result)
+          result-ok (remove #(:error %) result)
+          result-bad (filter #(:error %) result)
           result-ok (->> result-ok
                          (sort-by :target)
                          (reverse))]
