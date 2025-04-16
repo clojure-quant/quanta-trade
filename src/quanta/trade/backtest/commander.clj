@@ -1,20 +1,32 @@
 (ns quanta.trade.backtest.commander
   (:require
-   [taoensso.telemere :as tm]
    [nano-id.core :refer [nano-id]]
    [quanta.trade.commander :as p]))
 
-(defn has-position-in [position-a p]
-  (let [asset (:asset p)]
-    (some #(= asset (:asset %)) (vals @position-a))))
+(defn check-risk [{:keys [asset-limit position-limit]} position-a p]
+  (let [asset (:asset p)
+        no-asset-limit? (= asset-limit 0)
+        no-position-limit? (= position-limit 0)]
+
+    (and
+     ; single asset limit
+     (or no-asset-limit?
+         (let [asset-count (->> (vals @position-a)
+                                (filter #(= asset (:asset %)))
+                                count)]
+           (< asset-count asset-limit)))
+     ; total position limit
+     (or no-position-limit?
+         (let [position-count (->> (vals @position-a)
+                                   count)]
+           (< position-count position-limit))))))
 
 (defn open-position! [position-a trade-a p]
-  (when (not (has-position-in position-a p))
-    (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx :entry-row])]
-      (swap! position-a assoc (:id p) p)
-      (swap! trade-a conj {:open p})
+  (let [p (select-keys p [:id :asset :side :qty :entry-price :entry-date :entry-idx :entry-row])]
+    (swap! position-a assoc (:id p) p)
+    (swap! trade-a conj {:open p})
     ;(tm/log! (str "positon open: " p))
-      {:open p})))
+    {:open p}))
 
 (defn close-position! [position-a trade-a roundtrip-a exit-p]
   (let [id (:id exit-p)
@@ -33,7 +45,7 @@
   (get-trades [_])
   (roundtrips [_]))
 
-(defrecord position-commander [position-a trade-a roundtrip-a]
+(defrecord position-commander [risk position-a trade-a roundtrip-a]
   backtest-commander
   (get-trades [_]
     (let [trades @trade-a]
@@ -50,19 +62,24 @@
       (assert qty "open-position needs :qty")
       (assert entry-price "open-position needs :entry-price")
        ;(println "commander/open! " position)
-      (open-position! position-a trade-a position)
-      position))
+      (when (check-risk risk position-a position)
+        (open-position! position-a trade-a position))))
   (close! [_ exit-position]
      ;(assert id "close-position needs :id")
      ;(assert exit-price "close-position needs :exit-price")
     ;(println "commander/close! " position)
     (close-position! position-a trade-a roundtrip-a exit-position)))
 
-(defn create-position-commander []
-  (let [position-a (atom {})
+(defn create-position-commander [{:keys [asset-limit
+                                         position-limit]
+                                  :or {asset-limit 1
+                                       position-limit 0}}]
+  (let [risk {:asset-limit asset-limit
+              :position-limit position-limit}
+        position-a (atom {})
         trade-a (atom [])
         roundtrip-a (atom [])]
-    (position-commander. position-a trade-a roundtrip-a)))
+    (position-commander. risk position-a trade-a roundtrip-a)))
 
 
 

@@ -1,6 +1,5 @@
 (ns quanta.trade.entry-signal.rule
   (:require
-   [taoensso.telemere :as tm]
    [quanta.trade.entry-signal.entry.core :as entry]
    [quanta.trade.entry-signal.exit.config.multiple :refer [setup-exit-rules create-exit-manager-for-position]]
    [quanta.trade.entry-signal.exit.position :as exit]))

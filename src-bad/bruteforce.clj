@@ -1,6 +1,5 @@
 (ns quanta.trade.bruteforce
   (:require
-   [de.otto.nom.core :as nom]
    [clojure.stacktrace :as stack]
    [tick.core :as t]
    [taoensso.telemere :as tm]
@@ -39,9 +38,7 @@
        (into {})))
 
 (defn run-target-fn-safe [target-fn result]
-  (if (nom/anomaly? result)
-    0.0
-    (target-fn result)))
+  (target-fn result))
 
 (defn run-show-fn-safe [show-fn result]
   (try

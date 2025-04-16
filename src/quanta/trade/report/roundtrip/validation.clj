@@ -1,7 +1,5 @@
 (ns quanta.trade.report.roundtrip.validation
   (:require
-   [de.otto.nom.core :as nom]
-   [taoensso.telemere :as tm]
    [tablecloth.api :as tc]
    [tick.core :as t]
    [malli.core :as m]
@@ -53,7 +51,7 @@
       (do
         (println "rt validation failed: rt:" rt "error: " (human-error-roundtrip rt))
         (println "rts: " rts)
-        (nom/fail ::roundtrip-validation-errror {:message (human-error-roundtrip rt)})))))
+        (throw (ex-info "roundtrip-validation-error" {:message (human-error-roundtrip rt)}))))))
 
 (defn validate-roundtrips-ds [roundtrip-ds]
   ;(tm/log! (str "validate-roundtrips-ds: " roundtrip-ds))

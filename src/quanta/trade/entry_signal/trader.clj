@@ -1,7 +1,6 @@
 (ns quanta.trade.entry-signal.trader
   (:require
    [missionary.core :as m]
-   [taoensso.telemere :as tm]
    [quanta.trade.entry-signal.rule :as rule]
    [quanta.trade.commander :as c]))
 

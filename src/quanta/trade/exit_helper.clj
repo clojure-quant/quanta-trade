@@ -5,7 +5,7 @@
 
 (defn long-exits
   "creates an entrysignal manager 
-   with a long positon at price 100.0 entry-idx 0
+   with a long position at price 100.0 entry-idx 0
    returns state that is used in exit?"
   [exit]
   (let [m (rule/create-entrysignal-manager
@@ -80,12 +80,12 @@
      {:type :profit-prct :prct 5.0}])
 
   (def m (long-exits exit))
-  (exit? m 100.0)
-  (exit? m 100.5)
-  (exit? m 100.9)
-  (exit? m 101.9)
+  ;(exit? m 100.0)
+  ;(exit? m 100.5)
+  ;(exit? m 100.9)
+  ;(exit? m 101.9)
 
-  (long-exit-prices exit [100.0 100.5 100.9 101.9])
+  ;(long-exit-prices exit [100.0 100.5 100.9 101.9])
 
   (def col
     {:atr [1.0 0.8 1.5 1.9 1.9

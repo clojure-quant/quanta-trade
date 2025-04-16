@@ -2,10 +2,11 @@
  :deps
  {org.clojure/clojure    {:mvn/version "1.11.3"}
   com.taoensso/telemere {:mvn/version "1.0.0-beta25"}
-  io.github.clojure-quant/quanta-market {:mvn/version "0.1.156"} ; to load real data in backtest
-  io.github.clojure-quant/quanta-bar-warehouse {:mvn/version "0.1.35"} ; *bar-db* env
-  io.github.clojure-quant/techml-dataset-cljs {:mvn/version "0.1.16"} ; tmlds transit encoding
+  io.github.clojure-quant/quanta-market {:mvn/version "0.6.162"} ; to load real data in backtest
+  io.github.clojure-quant/quanta-bar-warehouse {:mvn/version "0.5.56"} ; *bar-db* env
+  io.github.clojure-quant/techml-dataset-cljs {:mvn/version "0.3.23"} ; tmlds transit encoding
   io.github.clojure-quant/quanta-trade {:local/root ".." :deps/manifest :deps}}
+ 
  :aliases
  {
 

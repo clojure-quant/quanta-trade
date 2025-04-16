@@ -1,14 +1,18 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure    {:mvn/version "1.11.3"}
         metosin/malli {:mvn/version "0.16.4"} ; roundtrip schemas
-        de.otto/nom {:mvn/version "0.3.0"}
         tick/tick {:mvn/version "0.6.2"}
-        org.pinkgorilla/timbre {:mvn/version "0.0.7"}
         scicloj/tablecloth {:mvn/version "7.029.2"} ; ensure clj-transit is there for sure.
         babashka/fs {:mvn/version "0.5.22"} ; create log dir
-        org.pinkgorilla/modular {:mvn/version "0.2.61"} ; fipp pretty printing
-        io.github.clojure-quant/quanta {:mvn/version "0.4.899"}
-        io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.23"}}
+        org.pinkgorilla/timbre {:mvn/version "0.0.8"}
+        org.pinkgorilla/modular {:mvn/version "0.2.69"} ; fipp pretty printing
+        ;io.github.clojure-quant/quanta {:mvn/version "0.4.899"}
+        io.github.clojure-quant/quanta-indicator-math {:mvn/version "0.5.5"} ; drawdown
+        ; quanta.trade.report.roundtrip.nav.mark2market needs calendar
+        ;io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.23"}
+        ; bruteforce needs dag-algo.
+        
+        }
 
  :aliases
  {:test {:extra-paths ["test"]
@@ -24,7 +28,7 @@
           :ns-default build}
 
   :lint
-  {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2024.03.13"}}
+  {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2025.04.07"}}
    :main-opts ["-m" "clj-kondo.main"
                "--config" "cljkondo.edn"
                "--fail-level" "error"
@@ -33,7 +37,7 @@
                "./dev/src"
                ]}
   
-    :cljfmt
+  :cljfmt
   {:extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}
    :main-opts ["-m" "cljfmt.main"
                "--indents" "cljfmt.edn"

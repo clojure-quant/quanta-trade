@@ -9,20 +9,20 @@
  :config-in-comment
  ^:replace
  {:linters
-  {:unresolved-symbol {:level :off}
+  {;:unresolved-symbol {:level :off}
    :unused-namespace {:level :off}
    :unused-binding {:level :off}
    :unused-referred-var {:level :off :exclude {}}
    :unused-private-var {:level :off}
    :redundant-do {:level :off}
-   :unresolved-var  {:level :off}
+   :unresolved-var  {:level :error}
    :aliased-namespace-symbol {:level :off}
    :aliased-namespace-var-usage {:level :off}
-   :type-mismatch {:level :off}
+   ;:type-mismatch {:level :off}
    :unbound-destructuring-default {:level :off}
-   :unresolved-namespace {:level :off}
-   :invalid-arity {:level :off}
-   :conflicting-fn-arity {:level :off}}}
+   :unresolved-namespace {:level :error}
+   :invalid-arity {:level :warn}
+   :conflicting-fn-arity {:level :warn}}}
 ; make sure certain macros do not cause errors in the linting.
   :lint-as {promesa.core/let clojure.core/let
             de.otto.nom.core/nom clojure.core/let
@@ -88,8 +88,8 @@
           ;; output can be filtered and removed by regex on filename. empty options leave the output untouched.
           :include-files [] #_["^src" "^test"]
           :exclude-files [;".*cljs"
-                          "./lib/indicator/src/ta/indicator/trade.*"
-                          "./lib/viz/src/ta/viz/notebook.*"
+                         ; "./lib/indicator/src/ta/indicator/trade.*"
+                         ; "./lib/viz/src/ta/viz/notebook.*"
                           ;"src/demo/goldly.*" 
                           ;"^cljs/core"
                          ; "profiles/test/src/demo/cljs.*"

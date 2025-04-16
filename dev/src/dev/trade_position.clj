@@ -23,7 +23,8 @@ signal-ds
 
 (def rts (signal->roundtrips signal-ds))
 
-(def r (roundtrip-stats rts))
+(def r (roundtrip-stats {:fee 0.2 ; per trade in percent
+                         :equity-initial 10000.0} rts))
 
 (:roundtrip-ds r)
 (:metrics r)

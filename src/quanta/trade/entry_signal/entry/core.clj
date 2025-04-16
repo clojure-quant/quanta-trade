@@ -17,8 +17,8 @@
   (and signal ; signal might be nil
        (contains? #{:long :short} signal)))
 
-(defn create-position [{:keys [asset entrysize-fn]}
-                       {:keys [date idx close entry] :as row}]
+(defn create-position [{:keys [entrysize-fn]}
+                       {:keys [date asset idx close entry] :as row}]
   {:side entry
    :asset asset
    :qty (entrysize-fn close)
