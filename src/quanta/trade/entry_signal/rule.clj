@@ -37,21 +37,22 @@
   ;(println "check-exit-position: " position)
   ;; {:id 5, :asset EUR/USD, :side :long, 
   ;;         :entry-price 1.1, :qty 100000}
-  (when-let [exit (exit/check-exit manager row)] ; [:profit-prct 1.1110000000000002]
-    (let [[exit-reason exit-price] exit
-          {:keys [id asset side entry-price entry-date qty]} position
-          {:keys [idx date]} row]
-      {:id id
-       :asset asset
-       :side side
-       :qty qty
-       :entry-price entry-price
-       :entry-date entry-date
+  (when (= (:asset row) (:asset position)) ; for multiple positions this is essential
+    (when-let [exit (exit/check-exit manager row)] ; [:profit-prct 1.1110000000000002]
+      (let [[exit-reason exit-price] exit
+            {:keys [id asset side entry-price entry-date qty]} position
+            {:keys [idx date]} row]
+        {:id id
+         :asset asset
+         :side side
+         :qty qty
+         :entry-price entry-price
+         :entry-date entry-date
      ; exit
-       :exit-reason exit-reason
-       :exit-idx idx
-       :exit-price exit-price
-       :exit-date date})))
+         :exit-reason exit-reason
+         :exit-idx idx
+         :exit-price exit-price
+         :exit-date date}))))
 
 (defn check-exit [{:keys [positions]} row]
   ;(println "rule/check-exit: " row)
