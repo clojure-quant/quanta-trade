@@ -51,7 +51,8 @@
   (swap! exit-idx inc)
   (swap! exit-date inc-day)
   ;(println "offset: " offset)
-  (let [bar {:open (+ price open)
+  (let [bar {:asset "QQQ"
+             :open (+ price open)
              :high (+ price high)
              :low (+ price low)
              :close (+ price close)
