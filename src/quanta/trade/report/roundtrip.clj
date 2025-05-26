@@ -8,8 +8,10 @@
    ;[quanta.trade.report.roundtrip.nav.grouped :refer [grouped-nav]]
    ))
 
-(defn nav-metrics [{:keys [equity drawdown drawdown-prct pl fee]}]
+(defn nav-metrics [{:keys [equity equity-gross
+                           drawdown drawdown-prct pl fee]}]
   {:equity-final (last equity)
+   :equity-final-gross (last equity-gross)
    :cum-pl (dfn/sum pl)
    :fee-total (dfn/sum fee)
    :max-drawdown (apply dfn/max drawdown)

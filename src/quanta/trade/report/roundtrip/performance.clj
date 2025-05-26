@@ -14,22 +14,25 @@
 
 (defn add-performance [{:keys [fee equity-initial]} roundtrip-ds]
   (let [roundtrip-ds (tc/order-by roundtrip-ds [:exit-date] [:asc])
-        {:keys [side qty entry-price exit-price exit-idx entry-idx]} roundtrip-ds
+        roundtrip-ds (tc/add-column roundtrip-ds :trade-no  (range (tc/row-count roundtrip-ds)))
+        {:keys [side qty entry-price exit-price exit-idx entry-idx trade-no]} roundtrip-ds
         ;; pl/equity
         ; _ (println "pl/equity")
         entry-volume (dfn/* qty entry-price)
         exit-volume (dfn/* qty exit-price)
         trading-volume (dfn/+ exit-volume entry-volume)
         pl-gross (adjust (dfn/- exit-volume entry-volume) side)
-        fee-m (* fee 0.01)
+        fee-m (* fee 0.01) ; fee parameter is as percent.
         pl-fee (dfn/+ (dfn/* entry-volume fee-m)
                       (dfn/* entry-volume fee-m))
         pl (dfn/- pl-gross pl-fee)
         equity  (dfn/+ (dfn/cumsum pl) equity-initial)
+        equity-gross (dfn/+ (dfn/cumsum pl-gross) equity-initial)
         equity-max (maximum-equity equity)
         ;; drawdown
         drawdown (drawdowns-from-value equity)
         drawdown-prct (dfn/* (dfn// drawdown equity-max) 100.0)
+        drawdown-prct (dfn/- 0.0 drawdown-prct) ; make sure drawdown is negative.
         ;; percent and log
         ;_ (println "prct/log")
         pl-points (adjust (dfn/- exit-price entry-price) side)
@@ -49,6 +52,8 @@
                      :pl pl
                      :win? (dfn/> pl 0.0)
                      :equity equity
+                     :equity-gross equity-gross
+                     :trade-no trade-no
                      ;; drawdown
                      :drawdown drawdown
                      :drawdown-prct drawdown-prct
