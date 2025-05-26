@@ -2,6 +2,7 @@
   (:require
    [tech.v3.dataset :as tds]
    [tech.v3.datatype.functional :as dfn]
+   [tablecloth.api :as tc]
    [quanta.trade.report.roundtrip.validation :refer [validate-roundtrips-ds]]
    [quanta.trade.report.roundtrip.performance :refer [add-performance]]
    [quanta.trade.report.roundtrip.metrics :refer [calc-roundtrip-metrics]]
@@ -9,13 +10,15 @@
    ))
 
 (defn nav-metrics [{:keys [equity equity-gross
-                           drawdown drawdown-prct pl fee]}]
-  {:equity-final (last equity)
-   :equity-final-gross (last equity-gross)
-   :cum-pl (dfn/sum pl)
-   :fee-total (dfn/sum fee)
-   :max-drawdown (apply dfn/max drawdown)
-   :max-drawdown-prct (apply dfn/max drawdown-prct)})
+                           drawdown drawdown-prct pl fee] :as roundtrip-ds}]
+  (if (= (tc/row-count roundtrip-ds) 0)
+    {}
+    {:equity-final (last equity)
+     :equity-final-gross (last equity-gross)
+     :cum-pl (dfn/sum pl)
+     :fee-total (dfn/sum fee)
+     :max-drawdown (apply dfn/max drawdown)
+     :max-drawdown-prct (apply dfn/max drawdown-prct)}))
 
 (defn roundtrip-stats
   "calculate statistics for roundtrips.

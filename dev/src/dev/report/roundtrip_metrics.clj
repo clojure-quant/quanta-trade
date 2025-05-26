@@ -1,7 +1,9 @@
 (ns dev.report.roundtrip-metrics
   (:require
    [tablecloth.api :as tc]
-   [quanta.trade.report.roundtrip.metrics :as m]))
+   [quanta.trade.report.roundtrip.metrics :as m]
+   [quanta.trade.report.roundtrip :refer [roundtrip-stats]]
+   [quanta.trade.report.roundtrip.performance :refer [add-performance]]))
 
 (def ds
   (tc/dataset
@@ -75,4 +77,23 @@ side-s
 ;;      :trade-prct 100.0,
 ;;      :bar-avg 1.0}}
 
+(def ds-notrades
+  (tc/dataset
+   {:side []
+    :pl []
+    :win? []
+    :bars []}))
 
+(def portfolio
+  {:fee 0.2 ; per trade in percent
+   :equity-initial 10000.0})
+
+(m/calc-roundtrip-metrics ds-notrades)
+
+(roundtrip-stats portfolio ds-notrades)
+
+(add-performance portfolio ds-notrades)
+
+(nav-metrics ds-notrades)
+
+(m/calc-roundtrip-metrics ds-notrades)

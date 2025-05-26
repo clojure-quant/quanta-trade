@@ -57,9 +57,12 @@
   ;(tm/log! (str "validate-roundtrips-ds: " roundtrip-ds))
   (assert (not (nil? roundtrip-ds)) "roundtrip-ds cannot be nil.")
   (assert (tds/dataset? roundtrip-ds) "validate-roundtrips-ds needs a tml dataset!")
-  (assert (> (tc/row-count roundtrip-ds) 0) "roundtrip-ds cannot have 0 rows.")
+  (if (= (tc/row-count roundtrip-ds) 0)
+    true
+    (validate-roundtrips (tds/mapseq-reader roundtrip-ds)))
+  ;(assert 
   ;(tm/log! "validate-roundtrips-ds: validation success!")
-  (validate-roundtrips (tds/mapseq-reader roundtrip-ds)))
+  )
 
 (comment
 
@@ -144,6 +147,15 @@
   ;;     :entry-idx 1034499}
 
 ;; => nil
+
+  (def ds-notrades
+    (tc/dataset
+     {:side []
+      :pl []
+      :win? []
+      :bars []}))
+
+  (validate-roundtrips-ds ds-notrades)
 
 ;  
   )

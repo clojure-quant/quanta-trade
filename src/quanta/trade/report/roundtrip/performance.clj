@@ -13,62 +13,64 @@
   (into [] xf-trailing-high equity))
 
 (defn add-performance [{:keys [fee equity-initial]} roundtrip-ds]
-  (let [roundtrip-ds (tc/order-by roundtrip-ds [:exit-date] [:asc])
-        roundtrip-ds (tc/add-column roundtrip-ds :trade-no  (range (tc/row-count roundtrip-ds)))
-        {:keys [side qty entry-price exit-price exit-idx entry-idx trade-no]} roundtrip-ds
+  (if (= (tc/row-count roundtrip-ds) 0)
+    roundtrip-ds
+    (let [roundtrip-ds (tc/order-by roundtrip-ds [:exit-date] [:asc])
+          roundtrip-ds (tc/add-column roundtrip-ds :trade-no  (range (tc/row-count roundtrip-ds)))
+          {:keys [side qty entry-price exit-price exit-idx entry-idx trade-no]} roundtrip-ds
         ;; pl/equity
         ; _ (println "pl/equity")
-        entry-volume (dfn/* qty entry-price)
-        exit-volume (dfn/* qty exit-price)
-        trading-volume (dfn/+ exit-volume entry-volume)
-        pl-gross (adjust (dfn/- exit-volume entry-volume) side)
-        fee-m (* fee 0.01) ; fee parameter is as percent.
-        pl-fee (dfn/+ (dfn/* entry-volume fee-m)
-                      (dfn/* entry-volume fee-m))
-        pl (dfn/- pl-gross pl-fee)
-        equity  (dfn/+ (dfn/cumsum pl) equity-initial)
-        equity-gross (dfn/+ (dfn/cumsum pl-gross) equity-initial)
-        equity-max (maximum-equity equity)
+          entry-volume (dfn/* qty entry-price)
+          exit-volume (dfn/* qty exit-price)
+          trading-volume (dfn/+ exit-volume entry-volume)
+          pl-gross (adjust (dfn/- exit-volume entry-volume) side)
+          fee-m (* fee 0.01) ; fee parameter is as percent.
+          pl-fee (dfn/+ (dfn/* entry-volume fee-m)
+                        (dfn/* entry-volume fee-m))
+          pl (dfn/- pl-gross pl-fee)
+          equity  (dfn/+ (dfn/cumsum pl) equity-initial)
+          equity-gross (dfn/+ (dfn/cumsum pl-gross) equity-initial)
+          equity-max (maximum-equity equity)
         ;; drawdown
-        drawdown (drawdowns-from-value equity)
-        drawdown-prct (dfn/* (dfn// drawdown equity-max) 100.0)
-        drawdown-prct (dfn/- 0.0 drawdown-prct) ; make sure drawdown is negative.
+          drawdown (drawdowns-from-value equity)
+          drawdown-prct (dfn/* (dfn// drawdown equity-max) 100.0)
+          drawdown-prct (dfn/- 0.0 drawdown-prct) ; make sure drawdown is negative.
         ;; percent and log
         ;_ (println "prct/log")
-        pl-points (adjust (dfn/- exit-price entry-price) side)
-        pl-prct (-> 100.0 (dfn/* pl) (dfn// entry-volume))
-        pl-log (adjust (dfn/- (dfn/log10 exit-price) (dfn/log10 entry-price)) side)
-        cum-points  (dfn/cumsum pl-points)
-        cum-log  (dfn/cumsum pl-log)
-        cum-prct  (dfn/cumsum pl-prct)]
-    (tc/add-columns roundtrip-ds
-                    {;; volume
-                     :volume-entry entry-volume
-                     :volume-exit exit-volume
-                     :volume-trading trading-volume
+          pl-points (adjust (dfn/- exit-price entry-price) side)
+          pl-prct (-> 100.0 (dfn/* pl) (dfn// entry-volume))
+          pl-log (adjust (dfn/- (dfn/log10 exit-price) (dfn/log10 entry-price)) side)
+          cum-points  (dfn/cumsum pl-points)
+          cum-log  (dfn/cumsum pl-log)
+          cum-prct  (dfn/cumsum pl-prct)]
+      (tc/add-columns roundtrip-ds
+                      {;; volume
+                       :volume-entry entry-volume
+                       :volume-exit exit-volume
+                       :volume-trading trading-volume
                      ;; pl/equity
-                     :pl-gross pl-gross
-                     :fee pl-fee
-                     :pl pl
-                     :win? (dfn/> pl 0.0)
-                     :equity equity
-                     :equity-gross equity-gross
-                     :trade-no trade-no
+                       :pl-gross pl-gross
+                       :fee pl-fee
+                       :pl pl
+                       :win? (dfn/> pl 0.0)
+                       :equity equity
+                       :equity-gross equity-gross
+                       :trade-no trade-no
                      ;; drawdown
-                     :drawdown drawdown
-                     :drawdown-prct drawdown-prct
-                     :equity-max equity-max
+                       :drawdown drawdown
+                       :drawdown-prct drawdown-prct
+                       :equity-max equity-max
                      ;; bars
-                     :bars (if (and entry-idx exit-idx)
-                             (dfn/- exit-idx entry-idx)
-                             0)
+                       :bars (if (and entry-idx exit-idx)
+                               (dfn/- exit-idx entry-idx)
+                               0)
                      ;; percent and log
-                     :pl-points pl-points
-                     :pl-prct pl-prct
-                     :pl-log pl-log
-                     :cum-points cum-points
-                     :cum-log cum-log
-                     :cum-prct cum-prct})))
+                       :pl-points pl-points
+                       :pl-prct pl-prct
+                       :pl-log pl-log
+                       :cum-points cum-points
+                       :cum-log cum-log
+                       :cum-prct cum-prct}))))
 
 (comment
 
