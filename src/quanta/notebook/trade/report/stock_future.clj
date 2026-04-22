@@ -1,6 +1,7 @@
 (ns quanta.notebook.trade.report.stock-future
   (:require
    [clojure.pprint :refer [print-table]]
+   [clojure.java.io :as io]
    [tick.core :as t]
    [tablecloth.api :as tc]
    [clojure.edn :as edn]
@@ -34,7 +35,9 @@
          roundtrips)))
 
 (defn load-roundtrips []
-  (->>  (slurp "demodata/roundtrips-stock-future.edn")
+  (->>  "demodata/roundtrips-stock-future.edn"
+        (io/resource)
+        (slurp)
         (edn/read-string)
         (map clean)
         (add-bar-index)))
