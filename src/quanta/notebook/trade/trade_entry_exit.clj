@@ -1,4 +1,4 @@
-(ns dev.trade-entry-exit
+(ns quanta.notebook.trade.trade-entry-exit
   (:require
    [tick.core :as t]
    [tablecloth.api :as tc]

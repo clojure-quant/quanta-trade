@@ -1,4 +1,4 @@
-(ns dev.exit.trailing-stop
+(ns quanta.notebook.trade.exit.trailing-stop
   (:require
    [quanta.trade.entry-signal.exit.position :refer [check-exit]]
    [quanta.trade.entry-signal.exit.config :refer [exit-rule]]))

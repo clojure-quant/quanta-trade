@@ -1,4 +1,4 @@
-(ns dev.backtest.from-entry
+(ns quanta.notebook.trade.backtest.from-entry
   (:require
    [taoensso.timbre :as timbre :refer [info]]
    [tablecloth.api :as tc]

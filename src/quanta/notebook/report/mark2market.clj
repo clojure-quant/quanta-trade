@@ -1,12 +1,13 @@
-(ns dev.report.mark2market
+(ns quanta.notebook.trade.report.mark2market
   (:require
-   [tick.core :as t]
-   [modular.system]
+   [tick.core :as t] 
    [ta.trade.roundtrip.nav.mark2market :refer [portfolio]]
    [ta.viz.trade.m2m.core :refer [m2m-chart]]
-   [ta.db.bars.protocol :as b]))
+   [ta.db.bars.protocol :as b]
+   [modular.system :refer [system]]
+   ))
 
-(def bardb (modular.system/system :bardb-dynamic))
+(def bardb (:bar-db system))
 
 (def rts [{:asset "ETHUSDT"
            :side :long

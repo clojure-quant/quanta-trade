@@ -1,4 +1,4 @@
-(ns dev.trade-position
+(ns quanta.notebook.trade.trade-position
   (:require
    [tick.core :as t]
    [tablecloth.api :as tc]

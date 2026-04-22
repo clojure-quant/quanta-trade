@@ -1,4 +1,4 @@
-(ns report.stock-future
+(ns quanta.notebook.trade.report.stock-future
   (:require
    [clojure.pprint :refer [print-table]]
    [tick.core :as t]

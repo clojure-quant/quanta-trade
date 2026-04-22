@@ -1,11 +1,17 @@
-(ns dev.backtest.backtest-trailing
+(ns quanta.notebook.trade.backtest.backtest-trailing
   (:require
    [tick.core :as t]
    [tablecloth.api :as tc]
-   [quanta.trade.backtest2 :refer [entry->roundtrips backtest]]))
+   [quanta.trade.backtest :refer [entry->roundtrips backtest]]))
 
 (def bar-ds
-  (tc/dataset {:date [(t/instant "2024-09-01T00:00:00Z")
+  (tc/dataset {:asset ["QQQ" "QQQ" "QQQ" "QQQ" 
+                       "QQQ" "QQQ" "QQQ"
+                       "QQQ" "QQQ" "QQQ" "QQQ" "QQQ"]
+               :idx [0 1 2 3 
+                     4 5 6 
+                     7 8 9 10]
+               :date [(t/instant "2024-09-01T00:00:00Z")
                       (t/instant "2024-09-02T00:00:00Z")
                       (t/instant "2024-09-03T00:00:00Z")
                       (t/instant "2024-09-04T00:00:00Z")

@@ -1,0 +1,20 @@
+{:extension/name :quanta-trade
+ :cljs/module :quanta-trade
+ :cljs/depends-on #{:rtable-cheetah 
+                    :rtable-vega
+                    ;:ui-container
+                    ;:tick-util 
+                    :main
+                    }
+ :cljs/namespace [quanta.trade.dali.viewer.backtest
+                  quanta.trade.dali.format]
+ :cljs/ns-bindings {; viewer
+                    'quanta.trade.dali.viewer.backtest {'metrics quanta.trade.dali.viewer.backtest/metrics
+                                                        'table quanta.trade.dali.viewer.backtest/table
+                                                        'chart quanta.trade.dali.viewer.backtest/chart
+                                                        'backtest quanta.trade.dali.viewer.backtest/backtest
+                                                        'overview quanta.trade.dali.viewer.backtest/overview}
+                    'quanta.trade.dali.format {'nr-format-0-digits quanta.trade.dali.format/nr-format-0-digits
+                                               'nr-format-auto quanta.trade.dali.format/nr-format-auto}
+                    }
+ }

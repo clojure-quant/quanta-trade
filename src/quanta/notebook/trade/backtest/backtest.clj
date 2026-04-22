@@ -1,4 +1,4 @@
-(ns dev.backtest.backtest
+(ns quanta.notebook.trade.backtest.backtest
   (:require
    [tick.core :as t]
    [tablecloth.api :as tc]

@@ -1,4 +1,4 @@
-(ns dev.exit.tests
+(ns quanta.notebook.trade.exit.tests
   (:require
    [quanta.trade.exit-helper :refer [long-exit-prices]]))
 

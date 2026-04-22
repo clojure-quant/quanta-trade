@@ -1,13 +1,14 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure    {:mvn/version "1.11.3"}
+ :deps {org.clojure/clojure {:mvn/version "1.11.3"}
         metosin/malli {:mvn/version "0.16.4"} ; roundtrip schemas
         tick/tick {:mvn/version "0.6.2"}
         scicloj/tablecloth {:mvn/version "7.029.2"} ; ensure clj-transit is there for sure.
         babashka/fs {:mvn/version "0.5.22"} ; create log dir
         org.pinkgorilla/timbre {:mvn/version "0.0.8"}
-        org.pinkgorilla/modular {:mvn/version "0.2.69"} ; fipp pretty printing
+        ;org.pinkgorilla/edn-x {:mvn/version "0.1.4"} ; fipp pretty printing 
         ;io.github.clojure-quant/quanta {:mvn/version "0.4.899"}
         io.github.clojure-quant/quanta-indicator-math {:mvn/version "0.5.5"} ; drawdown
+        org.pinkgorilla/dali-table {:mvn/version "0.8.130"} ; vega, cheetah, ..
         ; quanta.trade.report.roundtrip.nav.mark2market needs calendar
         ;io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.23"}
         ; bruteforce needs dag-algo.

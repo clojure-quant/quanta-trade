@@ -1,4 +1,4 @@
-(ns dev.backtest.rule
+(ns quanta.notebook.trade.backtest.rule
   (:require
    [tick.core :as t]
    [quanta.trade.entry-signal.core :as rule]))
