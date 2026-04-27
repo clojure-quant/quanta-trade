@@ -18,8 +18,7 @@
                                   :y {:field "equity-gross"
                                       :type "quantitative"
                                       :domain false
-                                      :scale {:zero false}
-                                      }}}
+                                      :scale {:zero false}}}}
                       {:mark {:type "line"
                               :interpolate "step-after"
                               :tooltip {:content "data"}}
@@ -27,9 +26,8 @@
                                   :y {:field "equity"
                                       :type "quantitative"
                                       :domain false
-                                      :scale {:zero false}
-                                      }}}]}
-             
+                                      :scale {:zero false}}}}]}
+
              {:height "100"
               :width "1200" ; Makes the line chart full width
               :mark {:type "bar"
@@ -58,9 +56,7 @@
               :encoding {:x {:field "exit-date" :type "temporal"}
                          :y {:field "trade-no"
                              :type "quantitative"
-                             :axis {:title "trade count" :orient "left"}}}}
-             
-             ]
+                             :axis {:title "trade count" :orient "left"}}}}]
 
    :data {:name "table"}})
 

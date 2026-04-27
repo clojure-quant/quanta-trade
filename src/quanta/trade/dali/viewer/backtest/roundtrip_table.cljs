@@ -11,22 +11,22 @@
 ;	 :cum-prct	:pl-log	:pl-gross		:pl-points	
 ;  :cum-points	
 
- (def ButtonColumn
-   (-> columns .-type .-ButtonColumn))
- 
- (def ButtonAction
-   (-> columns .-action .-ButtonAction))
+(def ButtonColumn
+  (-> columns .-type .-ButtonColumn))
 
- (defn cols-link [action]
-   [{:caption "..."
-     :width 50
-     :columnType (ButtonColumn. (clj->js {:caption "c"}))
-     :action (ButtonAction. (clj->js {:action (fn [r]
-                                                (let [r (js->clj r)]
-                                                  (println "clicked: " r)
-                                                  (action {:date (or (:entry-date r) (get r "entry-date"))
-                                                           :asset (or (:asset r) (get r "asset"))})))}))}])
-(def cols-main 
+(def ButtonAction
+  (-> columns .-action .-ButtonAction))
+
+(defn cols-link [action]
+  [{:caption "..."
+    :width 50
+    :columnType (ButtonColumn. (clj->js {:caption "c"}))
+    :action (ButtonAction. (clj->js {:action (fn [r]
+                                               (let [r (js->clj r)]
+                                                 (println "clicked: " r)
+                                                 (action {:date (or (:entry-date r) (get r "entry-date"))
+                                                          :asset (or (:asset r) (get r "asset"))})))}))}])
+(def cols-main
   [; bar
    {:field "asset" :caption "asset" :width 90}
                 ;{:field "id" :caption "id" :width 50}
@@ -55,20 +55,18 @@
    {:field "drawdown-prct" :caption "ddl%" :width 50 :format f/nr-format-0-digits}
                 ; metrics
    {:field "bars" :caption "bars" :width 50}
-   {:field "win?" :caption "win?" :width 50 :style blue-color :format f/format-bool}]
-  ) 
+   {:field "win?" :caption "win?" :width 50 :style blue-color :format f/format-bool}])
 
-
-(defn roundtrips-cheetah 
+(defn roundtrips-cheetah
   ([ds]
-    [cheetah-ds
-     {:style {:width "100%" :height "100%"}
-      :columns  cols-main
-      :ds ds}])
+   [cheetah-ds
+    {:style {:width "100%" :height "100%"}
+     :columns  cols-main
+     :ds ds}])
   ([ds action]
-    [cheetah-ds
-     {:style {:width "100%" :height "100%"}
-      :columns (if action 
-                 (concat (cols-link action) cols-main)
-                 cols-main)
-      :ds ds}]))
+   [cheetah-ds
+    {:style {:width "100%" :height "100%"}
+     :columns (if action
+                (concat (cols-link action) cols-main)
+                cols-main)
+     :ds ds}]))

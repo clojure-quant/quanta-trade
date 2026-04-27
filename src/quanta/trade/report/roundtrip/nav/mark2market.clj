@@ -9,9 +9,7 @@
    [ta.calendar.core :as cal]
    [ta.db.bars.multi-asset :refer [load-aligned-assets is-valid? calendar-seq->date-ds]]
    ;; QUANTA.TRADE.MARK2MARKET backtest uses ta.db.bars.multi-asset which is now quanta.bar.multi-asset
-
    ))
-
 (defn filter-range [bar-ds {:keys [start end]}]
   (tc/select-rows
    bar-ds

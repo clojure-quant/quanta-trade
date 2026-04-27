@@ -28,24 +28,24 @@
      [:div "options"
       [:p (pr-str opts)]]
      [:table
-      [:tbody 
-      [:tr
-       [:td "equity final"]
-       [:td (f/nr-format-0-digits equity-final)]]
-      [:tr
-       [:td "cum-pl"]
-       [:td (f/nr-format-0-digits  cum-pl)]]
-      [:tr
-       [:td "max-dd"]
-       [:td (f/nr-format-0-digits max-drawdown) " prct: " (f/nr-format-0-digits max-drawdown-prct)]]
-      [:tr
-       [:td "profit factor "]
-       [:td pf]]
-      [:tr
-       [:td "fees"]
-       [:td  (f/nr-format-0-digits fee-total)]]]]
+      [:tbody
+       [:tr
+        [:td "equity final"]
+        [:td (f/nr-format-0-digits equity-final)]]
+       [:tr
+        [:td "cum-pl"]
+        [:td (f/nr-format-0-digits  cum-pl)]]
+       [:tr
+        [:td "max-dd"]
+        [:td (f/nr-format-0-digits max-drawdown) " prct: " (f/nr-format-0-digits max-drawdown-prct)]]
+       [:tr
+        [:td "profit factor "]
+        [:td pf]]
+       [:tr
+        [:td "fees"]
+        [:td  (f/nr-format-0-digits fee-total)]]]]
      [:table
-      [:tbody 
+      [:tbody
        [:tr
         [td-border [:span {:style {:width "3cm"}} " "]]
         [td-border [:span {:style {:min-width "100px"}} "all"]]
@@ -82,7 +82,7 @@
         [td-border (-> all :bar-avg f/nr-format-0-digits)
          [:span {:class "text-blue-500"
                  :style {:float "right"}}
-           (str "[" (:bars all) "]")]]
+          (str "[" (:bars all) "]")]]
         [td-border (-> win :bar-avg f/nr-format-0-digits)
          [:span {:class "text-blue-500"
                  :style {:float "right"}}

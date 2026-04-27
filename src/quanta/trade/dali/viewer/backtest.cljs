@@ -16,7 +16,6 @@
 (def chart
   quanta.trade.dali.viewer.backtest.roundtrip-chart/roundtrip-chart)
 
-
 (defn backtest [{:keys [style class data action]
                  :or {style {:height "100%"
                              :width "100%"}
@@ -38,8 +37,7 @@
        [:a {:display {:cursor "pointer"
                       :margin "1px"}
             :on-click #(when show-backtest
-                         (show-backtest id) 
-                         )}
+                         (show-backtest id))}
         [:i {:class "fas fa-eye m-1"}]
         [:span {:style {:background-color "blue"}}
          id]]])))
