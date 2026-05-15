@@ -8,10 +8,11 @@
         ;org.pinkgorilla/edn-x {:mvn/version "0.1.4"} ; fipp pretty printing 
         ;io.github.clojure-quant/quanta {:mvn/version "0.4.899"}
         io.github.clojure-quant/quanta-indicator-math {:mvn/version "0.5.5"} ; drawdown
+        io.github.clojure-quant/quanta-calendar {:mvn/version "0.6.32"} ; quanta.trade.report.roundtrip.nav.mark2market needs calendar
         org.pinkgorilla/dali-table {:mvn/version "0.8.130"} ; vega, cheetah, ..
-        ; quanta.trade.report.roundtrip.nav.mark2market needs calendar
-        ;io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.23"}
-        ; bruteforce needs dag-algo.
+        
+        ;io.github.clojure-quant/quanta-dag-algo {:mvn/version "0.2.23"} ; bruteforce needs dag-algo.
+        
         
         }
 
