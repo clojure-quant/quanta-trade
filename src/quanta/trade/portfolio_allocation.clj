@@ -13,11 +13,9 @@
   `create-idx-links` never returns its index from a date match); every other column is 0.0."
   [return-ds allocation-ds]
   (let [cols (tc/column-names allocation-ds)
-        date-max (apply t/max (concat (vec (tc/column allocation-ds :date))
-                                      (vec (tc/column return-ds :date))))
-        sentinel (.plusDays date-max 1)
+        date-sentinel (-> return-ds :date first)
         zero-row (into {}
-                       (map (fn [c] [c (if (= :date c) sentinel 0.0)]))
+                       (map (fn [c] [c (if (= :date c) date-sentinel 0.0)]))
                        cols)]
     (tc/concat allocation-ds (tc/dataset [zero-row]))))
 
